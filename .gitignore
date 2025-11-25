@@ -1,0 +1,70 @@
+﻿# IntelIntent .gitignore
+
+# PowerShell
+*.ps1xml
+PSReadLine/
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Boot files (keep structure but ignore binaries)
+bootmgr
+bootmgr.efi
+*.efi
+*.wim
+sources/
+
+# Logs and checkpoints (generated during execution)
+**/Recursive_Operations/checkpoint*.txt
+**/Recursive_Operations/*.log
+Recovery_Logs/*.log
+*.log
+
+# Backup data
+Backup/**/*.bak
+**/backup_*.zip
+
+# Environment-specific
+.env
+*.local
+
+# IDE
+.vscode/
+.vs/
+*.swp
+*.swo
+
+# Node modules (if any JS tooling)
+node_modules/
+
+# Python virtual environments
+.venv/
+venv/
+*.pyc
+__pycache__/
+
+# Large seed directories (customize as needed)
+IntelIntent-Seed/Documents/
+IntelIntent-Seed/Apps/
+IntelIntent-Seed/Pictures/
+IntelIntent-Seed/Camera Roll/
+IntelIntent-Seed/Screenshots/
+IntelIntent-Seed/Dell/
+IntelIntent-Seed/WindowsPowerShell/Modules/
+IntelIntent-Seed/PowerShell/Modules/
+IntelIntent-Seed/archive/
+IntelIntent-Seed/UMMS_VSCode_Seeder/
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# Azure/deployment secrets
+*.pfx
+*.cer
+*.key
+secrets.json
