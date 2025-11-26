@@ -1,0 +1,44 @@
+
+# IntelIntent GitHub Orchestration: Fresh Restart Protocol
+
+## Objective:
+Initiate a complete reset and recursive reconfiguration of both GitHub Personal and GitHub Enterprise environments for the IntelIntent project.
+
+## Step 1: Remove Legacy Configurations
+- Identify and archive all legacy repositories, workflows, and configuration files.
+- Delete deprecated branches, unused forks, and outdated CI/CD pipelines.
+- Clear stale secrets, tokens, and environment variables from both environments.
+
+## Step 2: Reset Repositories
+- Create new repositories for:
+  - IntelIntent_Core
+  - IntelIntent_CoE_Modules
+  - IntelIntent_Fluent2_Interface
+  - IntelIntent_URMTO_Engine
+  - IntelIntent_Feedback_Systems
+- Initialize each repository with a README, LICENSE, and .gitignore file.
+- Set up protected branches and semantic versioning.
+
+## Step 3: Recursively Configure GitHub Personal
+- Enable GitHub Copilot for personal account.
+- Configure Copilot to generate atomic components from semantic manifest.
+- Set up recursive feedback workflows using GitHub Actions.
+- Link repositories to personal dashboard for modular orchestration.
+
+## Step 4: Recursively Configure GitHub Enterprise
+- Enable GitHub Copilot Enterprise features.
+- Configure enterprise-level access controls and team permissions.
+- Set up recursive CI/CD pipelines for modular deployment.
+- Integrate semantic dashboards and feedback loops across teams.
+
+## Step 5: Semantic Alignment and Feedback Systems
+- Embed semantic metadata in each repository (intent, context, execution).
+- Create recursive feedback workflows using GitHub Issues and Discussions.
+- Implement journaling protocol for post-cursive reflection.
+
+## Final Step: Verification and Activation
+- Validate recursive integrity of all modules.
+- Confirm semantic alignment with IntelIntent manifest.
+- Activate orchestration and monitor recursive execution.
+
+# End of Prompt

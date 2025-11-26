@@ -1,0 +1,4 @@
+Instructions for reinstalling Windows:
+1. Create a bootable USB using the Windows Media Creation Tool.
+2. Boot from USB and follow the installation steps.
+3. After installation, run the Environment Configuration script.

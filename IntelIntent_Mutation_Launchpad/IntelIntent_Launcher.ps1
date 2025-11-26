@@ -1,0 +1,13 @@
+# PowerShell interactive launcher script
+Write-Host 'IntelIntent Mutation Launcher'
+Write-Host '================================='
+Write-Host '1. Run Identity Modules'
+Write-Host '2. Run Environment Setup'
+Write-Host '3. Run Tooling'
+Write-Host '4. Run Services'
+Write-Host '5. Run Enhancements'
+Write-Host '6. Run Security Validation'
+Write-Host '7. Run Remote Updates'
+Write-Host '8. Run Autopilot Provisioning'
+Write-Host '9. Run CI CD Workflows'
+Write-Host '0. Exit'

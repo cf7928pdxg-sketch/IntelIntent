@@ -1,0 +1,79 @@
+
+# IntelIntent: Recursive Strategies Guide for GitHub Copilot
+
+This guide enables GitHub Copilot to recursively utilize the IntelIntent development tooling guide for modular agent instantiation, semantic trigger usage, modality activation, safe automation layers, and recursive orchestration.
+
+## 1. Root Node Initialization
+
+Start with the OrchestratorAgent:
+- File: agents/OrchestratorAgent/semantic_router.py
+- Purpose: Route semantic intent to modular agents
+- Prompt: "Create a semantic router that receives intent and dispatches to agents based on trigger_map.json"
+
+## 2. Modular Agent Instantiation
+
+For each agent (Finance, Boopas, Identity, Deployment, Modality):
+- Create agent_core.py in respective folder
+- Prompt: "Build [AgentName] logic to handle domain-specific tasks and respond to semantic triggers"
+- Include recursive functions for:
+  - Self-replication
+  - Decomposition
+  - Feedback propagation
+
+## 3. Semantic Trigger Usage
+
+Use semantic_triggers/trigger_map.json:
+- Define triggers like:
+  {
+    "on_invoice_received": "BoopasAgent",
+    "on_financial_query": "FinanceAgent"
+  }
+- Prompt: "Create a function that reads trigger_map.json and routes events to the correct agent"
+
+Use event_driven_workflows.py:
+- Prompt: "Implement recursive workflows that respond to semantic triggers and invoke agent logic"
+
+## 4. Modality Activation
+
+Enable multi-modal interaction:
+- Voice: Azure Speech + TTS
+- Audio: Azure Cognitive Services
+- Screen: Snipping Tool + Copilot
+- File System: Python + OS module
+- Cloud APIs: Azure SDKs
+
+Prompt: "Add modality support for [modality] using [tool] and integrate with agent logic"
+
+## 5. Safe Automation Layers
+
+Use GitHub Actions:
+- Prompt: "Create CI/CD pipeline to deploy agent updates and infrastructure"
+
+Use Azure Bicep:
+- Prompt: "Write Bicep templates to deploy modular infrastructure for IntelIntent"
+
+Use Power Automate:
+- Prompt: "Create flows that trigger agent workflows from Microsoft 365 events"
+
+Use Entra ID:
+- Prompt: "Integrate secure identity and access control for agent execution"
+
+## 6. Recursive Orchestration Principles
+
+Ensure all agents:
+- Are semantically tethered to the OrchestratorAgent
+- Support recursive feedback and learning
+- Can be scaled, merged, separated, or decomposed
+
+Prompt: "Implement recursive orchestration logic that allows agents to evolve and interact based on semantic context"
+
+## 7. Documentation and Prompt Strategy
+
+Use copilot_prompt.txt:
+- Content:
+  "You are GitHub Copilot. Complete the IntelIntent system using modular agents, semantic triggers, and recursive orchestration. Start with the OrchestratorAgent and instantiate all other agents. Use trigger_map.json to route logic. Ensure safe, scalable, and interoperable development."
+
+Use inline comments in each file to guide Copilot:
+- Example:
+  # This function handles semantic routing for financial queries
+
