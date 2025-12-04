@@ -1,0 +1,71 @@
+
+name: provision-m365
+
+on:
+  workflow_dispatch:
+    inputs:
+      siteName:
+        description: 'SharePoint site name (e.g., UMMS-NGMI)'
+        required: true
+      siteUrl:
+        description: 'SharePoint site URL (e.g., https://contoso.sharepoint.com/sites/umms-ngmi)'
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install CLI for Microsoft 365
+        run: |
+          npm i -g @pnp/cli-microsoft365@latest
+
+      - name: Auth to Microsoft 365 (certificate)
+        env:
+          M365_TENANT: ${{ secrets.M365_TENANT }}
+          M365_APP_ID: ${{ secrets.M365_APP_ID }}
+          M365_CERT_B64: ${{ secrets.M365_CERT_B64 }}
+          M365_CERT_PASSPHRASE: ${{ secrets.M365_CERT_PASSPHRASE }}
+        run: |
+          echo "$M365_CERT_B64" | base64 -d > cert.pfx
+          m365 login --authType certificate \
+            --tenant $M365_TENANT \
+            --appId $M365_APP_ID \
+            --certificateBase64Encoded "$M365_CERT_B64" \
+            --password "$M365_CERT_PASSPHRASE"
+
+      - name: Create Communication Site (if not exists)
+        run: |
+          m365 spo site add --type CommunicationSite \
+            --url "${{ github.event.inputs.siteUrl }}" \
+            --title "${{ github.event.inputs.siteName }}" \
+            --siteDesign Topic || echo "Site may already exist."
+
+      - name: Create core libraries
+        run: |
+          m365 spo list add --title Docs --url "${{ github.event.inputs.siteUrl }}" --listTemplate DocumentLibrary || true
+          m365 spo list add --title Modules --url "${{ github.event.inputs.siteUrl }}" --listTemplate DocumentLibrary || true
+          m365 spo list add --title Agents --url "${{ github.event.inputs.siteUrl }}" --listTemplate DocumentLibrary || true
+
+      - name: Add site columns (Domain/Portfolio/Module/Status)
+        run: |
+          m365 spo field add --webUrl "${{ github.event.inputs.siteUrl }}" --listTitle Docs --xml '<Field DisplayName="Domain" Name="Domain" Type="Choice"><CHOICES><CHOICE>personal</CHOICE><CHOICE>family</CHOICE><CHOICE>business</CHOICE><CHOICE>shared-platform</CHOICE></CHOICES></Field>' || true
+          m365 spo field add --webUrl "${{ github.event.inputs.siteUrl }}" --listTitle Docs --xml '<Field DisplayName="Portfolio" Name="Portfolio" Type="Text" />' || true
+          m365 spo field add --webUrl "${{ github.event.inputs.siteUrl }}" --listTitle Docs --xml '<Field DisplayName="Module" Name="Module" Type="Text" />' || true
+          m365 spo field add --webUrl "${{ github.event.inputs.siteUrl }}" --listTitle Docs --xml '<Field DisplayName="Status" Name="Status" Type="Choice"><CHOICES><CHOICE>Draft</CHOICE><CHOICE>In Review</CHOICE><CHOICE>Published</CHOICE></CHOICES></Field>' || true
+
+      - name: Publish landing page
+        run: |
+          m365 spo page add --name Home.aspx --webUrl "${{ github.event.inputs.siteUrl }}" --publish || true
+          m365 spo page text add --pageName Home.aspx --webUrl "${{ github.event.inputs.siteUrl }}" --text "<h1>Unified Microsoft Modernization System — NGMI</h1><p>Auto-provisioned on ${{ github.run_id }}</p>" --section 1 --column 1 || true

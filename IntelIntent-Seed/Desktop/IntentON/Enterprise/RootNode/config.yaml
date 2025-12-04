@@ -1,0 +1,24 @@
+# IntentON Configuration for Enterprise RootNode
+
+node_behavior:
+  logging: true
+  error_handling: "strict"
+  max_retries: 3
+
+parameters:
+  timeout: 30
+  retry_interval: 5
+
+features:
+  enable_feature_x: true
+  enable_feature_y: false
+
+dependencies:
+  - service_a
+  - service_b
+
+environment:
+  production:
+    db_connection_string: "your_production_db_connection_string"
+  development:
+    db_connection_string: "your_development_db_connection_string"

@@ -1,0 +1,25 @@
+{
+  "Duration": {
+    "Ticks": 15831971,
+    "Days": 0,
+    "Hours": 0,
+    "Milliseconds": 583,
+    "Microseconds": 197,
+    "Nanoseconds": 100,
+    "Minutes": 0,
+    "Seconds": 1,
+    "TotalDays": 1.832404050925926E-05,
+    "TotalHours": 0.00043977697222222223,
+    "TotalMilliseconds": 1583.1971,
+    "TotalMicroseconds": 1583197.1,
+    "TotalNanoseconds": 1583197100.0,
+    "TotalMinutes": 0.026386618333333334,
+    "TotalSeconds": 1.5831971
+  },
+  "TotalTests": 123,
+  "Failed": 42,
+  "Passed": 81,
+  "Skipped": 0,
+  "Timestamp": "2025-11-30 21:54:00",
+  "PassPercentage": 65.85
+}

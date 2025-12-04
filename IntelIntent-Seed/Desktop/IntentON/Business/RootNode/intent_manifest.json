@@ -1,0 +1,27 @@
+{
+  "intents": [
+    {
+      "name": "CreateInvoice",
+      "parameters": {
+        "amount": "number",
+        "dueDate": "string",
+        "client": "string"
+      }
+    },
+    {
+      "name": "ScheduleMeeting",
+      "parameters": {
+        "date": "string",
+        "time": "string",
+        "participants": "array"
+      }
+    },
+    {
+      "name": "SendReminder",
+      "parameters": {
+        "message": "string",
+        "recipient": "string"
+      }
+    }
+  ]
+}

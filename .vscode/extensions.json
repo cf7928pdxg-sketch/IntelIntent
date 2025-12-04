@@ -1,0 +1,30 @@
+{
+    "recommendations": [
+        // Core Development
+        "ms-vscode.powershell",
+        "github.copilot",
+        "github.copilot-chat",
+        // Azure Development Suite (Week1_Automation.ps1 integration)
+        "ms-vscode.azurecli",
+        "ms-azuretools.vscode-bicep",
+        "ms-azuretools.vscode-azurefunctions",
+        "ms-vscode.azure-account",
+        "msazurermtools.azurerm-vscode-tools",
+        "ms-azuretools.vscode-azureresourcegroups",
+        "ms-azuretools.vscode-docker",
+        // Documentation & Visualization
+        "davidanson.vscode-markdownlint",
+        "yzhang.markdown-all-in-one",
+        "bierner.markdown-mermaid",
+        "redhat.vscode-yaml",
+        "streetsidesoftware.code-spell-checker",
+        "hediet.vscode-drawio",
+        "jebbs.plantuml",
+        // Quality & Productivity
+        "ms-vscode.live-server",
+        "oderwat.indent-rainbow",
+        "aaron-bond.better-comments",
+        "eamodio.gitlens",
+        "ms-vscode.test-adapter-converter"
+    ]
+}

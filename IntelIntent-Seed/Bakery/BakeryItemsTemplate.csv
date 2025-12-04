@@ -1,0 +1,38 @@
+Item No.,Description,Item Category,Base UOM,Purchase UOM,Recipe UOM,Production Stage,Shelf Life Days,Storage Type,Contains Gluten,Contains Dairy,Contains Nuts,Contains Eggs,Par Value Mon-Thu,Par Value Fri-Sun,Price,Conversion Factor,Converted To Item
+RM-FLOUR-SL,Sir Lancelot Flour,Raw Ingredient,lb,50 lb bag,lb/oz,Not Applicable,365,Ambient,Yes,No,No,No,,,,,
+RM-YEAST,Yeast,Raw Ingredient,oz,case,oz,Not Applicable,180,Refrigerated,No,No,No,No,,,,,
+RM-SALT-K,Kosher Salt,Raw Ingredient,lb,case,lb/oz,Not Applicable,999,Ambient,No,No,No,No,,,,,
+RM-SUGAR-BR,Brown Sugar,Raw Ingredient,oz,case,oz,Not Applicable,365,Ambient,No,No,No,No,,,,,
+RM-HONEY,Honey,Raw Ingredient,oz,case,oz,Not Applicable,730,Ambient,No,No,No,No,,,,,
+RM-MALT,Malt,Raw Ingredient,can,case,can,Not Applicable,365,Ambient,Yes,No,No,No,,,,,
+RM-JALAPENO-D,Dried Jalapenos,Raw Ingredient,oz,case,oz,Not Applicable,365,Ambient,No,No,No,No,,,,,
+RM-REDPEPPER-D,Dried Red Bell Pepper,Raw Ingredient,oz,case,oz,Not Applicable,365,Ambient,No,No,No,No,,,,,
+RM-CHEESE-CHED,Cheddar Cheese,Raw Ingredient,oz,case,oz,Not Applicable,90,Refrigerated,No,Yes,No,No,,,,,
+RM-SPICE-ASIAGO,Asiago Spice,Raw Ingredient,oz,case,oz,Not Applicable,365,Ambient,No,No,No,No,,,,,
+RM-PARSLEY,Parsley,Raw Ingredient,oz,case,oz,Not Applicable,365,Ambient,No,No,No,No,,,,,
+RM-CHEESE-ASIAGO,Asiago Cheese,Raw Ingredient,oz,case,oz,Not Applicable,90,Refrigerated,No,Yes,No,No,,,,,
+RM-WATER,Water,Raw Ingredient,lb,N/A,lb,Not Applicable,0,N/A,No,No,No,No,,,,,
+WIP-DOUGH-PLAIN,Plain Bagel Dough,WIP,lb,N/A,lb,Bulk,1,Refrigerated,Yes,No,No,No,,,,,
+WIP-DOUGH-JALCHED,Jalapeno Cheddar Dough,WIP,lb,N/A,lb,Bulk,1,Refrigerated,Yes,Yes,No,No,,,,,
+WIP-DOUGH-ASIAGO,Asiago Dough,WIP,lb,N/A,lb,Bulk,1,Refrigerated,Yes,Yes,No,No,,,,,
+WIP-BAGEL-PLAIN,Formed Plain Bagel,WIP,each,N/A,each,Formed,1,Refrigerated,Yes,No,No,No,,,,,
+WIP-BAGEL-JALCHED,Formed Jalapeno Cheddar Bagel,WIP,each,N/A,each,Formed,1,Refrigerated,Yes,Yes,No,No,,,,,
+WIP-BAGEL-ASIAGO,Formed Asiago Bagel,WIP,each,N/A,each,Formed,1,Refrigerated,Yes,Yes,No,No,,,,,
+WIP-BOOP-PLAIN,Formed Plain Boopalach,WIP,each,N/A,each,Formed,1,Refrigerated,Yes,No,No,No,,,,,
+WIP-BOOP-JALCHED,Formed Jalapeno Cheddar Boopalach,WIP,each,N/A,each,Formed,1,Refrigerated,Yes,Yes,No,No,,,,,
+WIP-BOOP-ASIAGO,Formed Asiago Boopalach,WIP,each,N/A,each,Formed,1,Refrigerated,Yes,Yes,No,No,,,,,
+WIP-CC-WHIPPED,Whipped Cream Cheese,WIP,lb,N/A,lb,Ready-to-Sell,7,Refrigerated,No,Yes,No,No,,,,,
+FG-BAGEL-PLAIN,Plain Bagel,Finished Good,each,N/A,each,Ready-to-Sell,1,Ambient,Yes,No,No,No,80,120,1.75,,
+FG-BAGEL-JALCHED,Jalapeno Cheddar Bagel,Finished Good,each,N/A,each,Ready-to-Sell,1,Ambient,Yes,Yes,No,No,40,60,2.00,,
+FG-BAGEL-ASIAGO,Asiago Bagel,Finished Good,each,N/A,each,Ready-to-Sell,1,Ambient,Yes,Yes,No,No,40,60,2.00,,
+FG-BOOP-PLAIN,Plain Boopalach,Finished Good,each,N/A,each,Ready-to-Sell,1,Ambient,Yes,No,No,No,60,90,2.25,,
+FG-BOOP-JALCHED,Jalapeno Cheddar Boopalach,Finished Good,each,N/A,each,Ready-to-Sell,1,Ambient,Yes,Yes,No,No,30,45,2.50,,
+FG-BOOP-ASIAGO,Asiago Boopalach,Finished Good,each,N/A,each,Ready-to-Sell,1,Ambient,Yes,Yes,No,No,30,45,2.50,,
+FG-BAGEL-PLAIN-PKG,Plain Bagels (6-pack),Finished Good,package,N/A,package,Ready-to-Sell,3,Ambient,Yes,No,No,No,5,10,7.50,0.16667,FG-BAGEL-PLAIN
+FG-BAGEL-JALCHED-PKG,Jalapeno Cheddar Bagels (6-pack),Finished Good,package,N/A,package,Ready-to-Sell,3,Ambient,Yes,Yes,No,No,3,5,9.00,0.16667,FG-BAGEL-JALCHED
+FG-BAGEL-ASIAGO-PKG,Asiago Bagels (6-pack),Finished Good,package,N/A,package,Ready-to-Sell,3,Ambient,Yes,Yes,No,No,3,5,9.00,0.16667,FG-BAGEL-ASIAGO
+FG-CC-PLAIN-8OZ,Plain Cream Cheese (8 oz),Finished Good,container,N/A,container,Ready-to-Sell,14,Refrigerated,No,Yes,No,No,20,30,4.50,0.5,WIP-CC-WHIPPED
+AS-BAGEL-PLAIN-CC,Plain Bagel with Cream Cheese,Assembly Item,each,N/A,each,Not Applicable,0,Not Applicable,Yes,Yes,No,No,,,3.25,,
+AS-BAGEL-JALCHED-CC,Jalapeno Cheddar Bagel with Cream Cheese,Assembly Item,each,N/A,each,Not Applicable,0,Not Applicable,Yes,Yes,No,No,,,3.50,,
+AS-BAGEL-ASIAGO-CC,Asiago Bagel with Cream Cheese,Assembly Item,each,N/A,each,Not Applicable,0,Not Applicable,Yes,Yes,No,No,,,3.50,,
+PFG-CC-PLAIN,Plain Cream Cheese Blocks,Purchased Finished Good,lb,30 lb case,lb,Not Applicable,90,Refrigerated,No,Yes,No,No,,,,,1.25,WIP-CC-WHIPPED

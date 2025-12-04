@@ -1,0 +1,20 @@
+node_name: BusinessNode
+description: Configuration for the Business domain node
+settings:
+  max_intents: 10
+  timeout: 30
+  logging:
+    level: info
+    file: business_node.log
+parameters:
+  currency: USD
+  region: North America
+  business_hours:
+    start: "09:00"
+    end: "17:00"
+    days: 
+      - Monday
+      - Tuesday
+      - Wednesday
+      - Thursday
+      - Friday

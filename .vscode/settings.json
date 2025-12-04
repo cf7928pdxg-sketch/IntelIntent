@@ -1,0 +1,178 @@
+{
+    // ============================================================
+    // IntelIntent PowerShell Development Configuration
+    // ============================================================
+    // PowerShell Extension Settings
+    "powershell.integratedConsole.showOnStartup": false,
+    "powershell.scriptAnalysis.enable": true,
+    "powershell.scriptAnalysis.settingsPath": ".vscode/PSScriptAnalyzerSettings.psd1",
+    // November 2025: Enhanced tree-sitter grammar for PowerShell 7 (supports && and ||)
+    "powershell.enableTreeSitterGrammar": true,
+    "powershell.codeFormatting.preset": "OTBS",
+    "powershell.codeFormatting.autoCorrectAliases": true,
+    "powershell.codeFormatting.useConstantStrings": true,
+    "powershell.codeFormatting.useCorrectCasing": true,
+    "powershell.codeFormatting.whitespaceBeforeOpenBrace": true,
+    "powershell.codeFormatting.whitespaceBeforeOpenParen": true,
+    "powershell.codeFormatting.whitespaceAroundOperator": true,
+    "powershell.codeFormatting.whitespaceAfterSeparator": true,
+    "powershell.codeFormatting.whitespaceBetweenParameters": false,
+    "powershell.codeFormatting.ignoreOneLineBlock": true,
+    "powershell.codeFormatting.alignPropertyValuePairs": true,
+    "powershell.codeFormatting.pipelineIndentationStyle": "IncreaseIndentationForFirstPipeline",
+    // PowerShell Debugging
+    "powershell.debugging.createTemporaryIntegratedConsole": false,
+    "powershell.pester.useLegacyCodeLens": false,
+    "powershell.pester.outputVerbosity": "Diagnostic",
+    // File Associations (Universal: Code, Scriptures, Architecture, Art)
+    "files.associations": {
+        "*.ps1": "powershell",
+        "*.psm1": "powershell",
+        "*.psd1": "powershell",
+        "*.ps1xml": "xml",
+        "*.json": "jsonc",
+        "*.jsonc": "jsonc",
+        "*.scripture": "markdown",
+        "*.temple": "yaml",
+        "*.blueprint": "yaml",
+        "*.ritual": "markdown",
+        "*.doctrine": "markdown",
+        "*.vision": "markdown",
+        "*.prophecy": "markdown"
+    },
+    // File Exclusions (Performance)
+    "files.exclude": {
+        "**/.git": true,
+        "**/node_modules": true,
+        "**/.DS_Store": true,
+        "**/boot": true,
+        "**/efi": true,
+        "**/sources": true
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "**/boot": true,
+        "**/efi": true,
+        "**/sources": true
+    },
+    // Editor Settings for PowerShell
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.rulers": [
+        120
+    ],
+    "editor.wordWrap": "off",
+    "editor.minimap.enabled": true,
+    "editor.suggestSelection": "first",
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    // IntelliSense
+    "editor.quickSuggestions": {
+        "other": true,
+        "comments": false,
+        "strings": false
+    },
+    // Git Integration
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "git.enableSmartCommit": true,
+    // November 2025: Git Repositories explorer with Stashes node (create/apply/pop/drop)
+    "scm.repositories.explorer": true,
+    // Terminal Settings
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    // November 2025: Enhanced terminal with xterm.js rendering and persistent sessions
+    "terminal.integrated.persistentSessions": true,
+    "terminal.integrated.enablePersistentSessions": true,
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell",
+            "args": [
+                "-NoLogo"
+            ]
+        },
+        "Windows PowerShell": {
+            "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "args": [
+                "-NoLogo"
+            ]
+        }
+    },
+    // Azure Integration - Enhanced for Week1_Automation.ps1 workflows
+    "azureFunctions.showProjectWarning": false,
+    "azureResourceGroups.enableOutputTimestamps": true,
+    // Azure CLI IntelliSense and validation
+    "azure.cloud": "AzureCloud",
+    "azure.ppe": false,
+    "azure.tenant": "",
+    // Enhanced Azure CLI command palette support
+    "azureCLI.showInTaskManager": true,
+    // GitHub Copilot - Optimized for IntelIntent Project Analysis
+    "github.copilot.enable": {
+        "*": true,
+        "powershell": true,
+        "markdown": true,
+        "json": true,
+        "jsonc": true,
+        "yaml": true,
+        "shellscript": true
+    },
+    // November 2025: Enhanced Copilot context awareness
+    "github.copilot.advanced": {
+        "inlineSuggestEnable": true,
+        "authProvider": "github"
+    },
+    // Copilot suggestions for comments and docstrings (better code generation)
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.inlineSuggest.enabled": true,
+    "editor.inlineSuggest.showToolbar": "onHover",
+    // Copilot context: Keep relevant files open for better suggestions
+    "workbench.editor.limit.enabled": true,
+    "workbench.editor.limit.value": 10,
+    "workbench.editor.limit.perEditorGroup": true,
+    // November 2025: Inline chat V2 backend with auto side-editor for external changes
+    "inlineChat.enableV2": true,
+    // November 2025: Unified Agent Sessions view (all chat/agent sessions in one place)
+    "chat.sessions.unifiedView": true,
+    // November 2025: Domain-level URL fetch approval for chat tools
+    "chat.fetch.urlApproval": "domain",
+    // November 2025: GitHub MCP Server (tools for repos, PRs, issues, orgs)
+    "github.copilot.mcp.enabled": true,
+    // November 2025: AI code actions in Quick Fix menu (Ctrl+. / lightbulb)
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit"
+    },
+    // Universal Creative Work Settings
+    "[powershell]": {
+        "editor.defaultFormatter": "ms-vscode.powershell",
+        "editor.semanticHighlighting.enabled": true,
+        "editor.tabSize": 4,
+        "files.encoding": "utf8bom",
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true
+    },
+    "[yaml]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.autoIndent": "advanced"
+    },
+    "[markdown]": {
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": {
+            "comments": "off",
+            "strings": "off",
+            "other": "off"
+        }
+    },
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    }
+}

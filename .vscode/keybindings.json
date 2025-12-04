@@ -1,0 +1,114 @@
+// IntelIntent Custom Keybindings
+// November 2025 VS Code Insiders Features
+[
+    // ============================================================
+    // Copilot CLI Agent Sessions (November 23, 2025)
+    // ============================================================
+    {
+        "key": "ctrl+shift+alt+a",
+        "command": "workbench.action.chat.newCLIAgentSession",
+        "when": "!inChat"
+    },
+    // ============================================================
+    // Chat Terminal Integration (November 22-26, 2025)
+    // ============================================================
+    {
+        "key": "ctrl+shift+alt+t",
+        "command": "workbench.action.chat.focusTerminal",
+        "when": "chat.hasTerminal"
+    },
+    {
+        "key": "ctrl+enter",
+        "command": "workbench.action.terminal.acceptWaitTask",
+        "when": "terminalWaitTaskActive"
+    },
+    // ============================================================
+    // Editor Navigation Improvements (November 11, 2025)
+    // ============================================================
+    {
+        "key": "ctrl+shift+left",
+        "command": "workbench.action.moveEditorToPreviousGroup"
+    },
+    {
+        "key": "ctrl+shift+right",
+        "command": "workbench.action.moveEditorToNextGroup"
+    },
+    // ============================================================
+    // Go To Offset (November 11, 2025)
+    // ============================================================
+    {
+        "key": "ctrl+g ctrl+o",
+        "command": "workbench.action.gotoOffset"
+    },
+    // ============================================================
+    // Window Management (November 21, 2025)
+    // ============================================================
+    {
+        "key": "ctrl+shift+alt+w",
+        "command": "workbench.action.closeOtherWindows"
+    },
+    // ============================================================
+    // PowerShell Specific
+    // ============================================================
+    {
+        "key": "f8",
+        "command": "PowerShell.RunSelection",
+        "when": "editorLangId == 'powershell'"
+    },
+    {
+        "key": "ctrl+f1",
+        "command": "PowerShell.OnlineHelp",
+        "when": "editorLangId == 'powershell'"
+    },
+    {
+        "key": "ctrl+shift+p",
+        "command": "PowerShell.ShowAdditionalCommands",
+        "when": "editorLangId == 'powershell' && editorTextFocus"
+    },
+    {
+        "key": "f5",
+        "command": "PowerShell.RunFile",
+        "when": "editorLangId == 'powershell'"
+    },
+    // ============================================================
+    // Git Stashes (November 26, 2025)
+    // ============================================================
+    {
+        "key": "ctrl+shift+alt+s",
+        "command": "workbench.scm.focus",
+        "when": "!terminalFocus"
+    },
+    // ============================================================
+    // Hover Control (November 10, 2025)
+    // ============================================================
+    {
+        "key": "ctrl",
+        "command": "editor.action.showHover",
+        "when": "editorTextFocus && !editorHoverVisible"
+    },
+    // ============================================================
+    // Terminal Suggestions (November 10, 2025)
+    // ============================================================
+    {
+        "key": "ctrl+space",
+        "command": "editor.action.triggerSuggest",
+        "when": "terminalFocus && terminalSuggestWidgetVisible"
+    },
+    // ============================================================
+    // IntelIntent Shortcuts
+    // ============================================================
+    {
+        "key": "ctrl+shift+b",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Week1 DryRun"
+    },
+    {
+        "key": "ctrl+shift+t",
+        "command": "workbench.action.tasks.test"
+    },
+    {
+        "key": "ctrl+shift+alt+c",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Validate Checkpoints"
+    }
+]

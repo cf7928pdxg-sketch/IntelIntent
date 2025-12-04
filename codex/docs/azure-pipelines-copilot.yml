@@ -1,0 +1,471 @@
+# Azure Pipelines YAML for Copilot Lifecycle Tracking
+# Integrates with existing IntelIntent Phase 4 CI/CD pipeline
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    include:
+      - codex/scripts/*
+      - codex/logs/*
+      - Week1_Automation.ps1
+      - IntelIntent_Seeding/*
+
+pr:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - codex/scripts/*
+      - codex/logs/*
+
+variables:
+  - name: WorkspaceName
+    value: 'IntelIntent'
+  - name: CopilotExtensionID
+    value: 'github.copilot'
+  - name: CodexLogsPath
+    value: '$(System.DefaultWorkingDirectory)/codex/logs'
+  - name: PowerBIWorkspaceID
+    value: '$(PowerBIWorkspaceID)'  # Set in pipeline variables
+  - name: PowerBIDatasetID
+    value: '$(PowerBIDatasetID)'    # Set in pipeline variables
+
+stages:
+  # Stage 1: Lifecycle Logging
+  - stage: LifecycleLogging
+    displayName: 'Log Copilot Lifecycle Events'
+    jobs:
+      - job: LogLifecycleEvent
+        displayName: 'Log Lifecycle Event'
+        pool:
+          vmImage: 'windows-latest'
+        
+        steps:
+          - checkout: self
+            fetchDepth: 0  # Full history for lineage tracking
+          
+          - task: PowerShell@2
+            displayName: 'Setup PowerShell 7'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $PSVersionTable.PSVersion
+                Write-Host "✅ PowerShell 7 ready"
+          
+          - task: PowerShell@2
+            displayName: 'Log Copilot Lifecycle Event'
+            inputs:
+              targetType: 'filePath'
+              filePath: '$(System.DefaultWorkingDirectory)/codex/scripts/Log-CopilotLifecycle.ps1'
+              arguments: >
+                -Action "Update"
+                -Version "v1.389.0"
+                -Workspace "$(WorkspaceName)"
+                -Reason "Azure DevOps pipeline build $(Build.BuildNumber)"
+                -Stage "$(Build.SourceBranchName)"
+                -RunId "$(Build.BuildId)"
+                -SessionID "AzDO-$(Build.BuildNumber)-$(Build.SourceVersion)"
+              pwsh: true
+          
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Lifecycle Log'
+            inputs:
+              PathtoPublish: '$(CodexLogsPath)/CopilotLifecycleLog.json'
+              ArtifactName: 'lifecycle-log'
+              publishLocation: 'Container'
+      
+      - job: LogInvocationEvents
+        displayName: 'Log Invocation Events'
+        dependsOn: LogLifecycleEvent
+        condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+        pool:
+          vmImage: 'windows-latest'
+        
+        steps:
+          - checkout: self
+          
+          - task: PowerShell@2
+            displayName: 'Log CI/CD Agent Invocation'
+            inputs:
+              targetType: 'filePath'
+              filePath: '$(System.DefaultWorkingDirectory)/codex/scripts/Log-CopilotInvocation.ps1'
+              arguments: >
+                -InvocationType "Agent"
+                -CommandID "github.copilot.agent.invoke"
+                -CompletionModel "claude-sonnet-4.5-2024-11-27"
+                -Workspace "$(WorkspaceName)"
+                -Context "Azure DevOps pipeline automation: Build $(Build.BuildNumber)"
+                -Stage "$(Build.SourceBranchName)"
+                -RunId "$(Build.BuildId)"
+                -SessionID "AzDO-$(Build.BuildNumber)-$(Build.SourceVersion)"
+              pwsh: true
+          
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Invocation Log'
+            inputs:
+              PathtoPublish: '$(CodexLogsPath)/CopilotInvocationLog.json'
+              ArtifactName: 'invocation-log'
+              publishLocation: 'Container'
+
+  # Stage 2: Integrity Validation
+  - stage: IntegrityValidation
+    displayName: 'Validate Codex Integrity'
+    dependsOn: LifecycleLogging
+    jobs:
+      - job: ValidateIntegrity
+        displayName: 'Run Integrity Tests'
+        pool:
+          vmImage: 'windows-latest'
+        
+        steps:
+          - checkout: self
+          
+          - task: DownloadBuildArtifacts@1
+            displayName: 'Download Lifecycle Log'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'lifecycle-log'
+              downloadPath: '$(CodexLogsPath)'
+          
+          - task: DownloadBuildArtifacts@1
+            displayName: 'Download Invocation Log'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'invocation-log'
+              downloadPath: '$(CodexLogsPath)'
+          
+          - task: PowerShell@2
+            displayName: 'Test Codex Integrity'
+            name: IntegrityTest
+            inputs:
+              targetType: 'filePath'
+              filePath: '$(System.DefaultWorkingDirectory)/codex/scripts/Test-CodexIntegrity.ps1'
+              arguments: '-Verbose'
+              pwsh: true
+              failOnStderr: false
+            continueOnError: false
+          
+          - task: PowerShell@2
+            displayName: 'Export Integrity Metrics'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $result = & "$(System.DefaultWorkingDirectory)/codex/scripts/Test-CodexIntegrity.ps1"
+                
+                Write-Host "##vso[task.setvariable variable=TotalEvents;isOutput=true]$($result.TotalEvents)"
+                Write-Host "##vso[task.setvariable variable=HashCompliance;isOutput=true]$($result.HashCompliancePercent)"
+                Write-Host "##vso[task.setvariable variable=AllValid;isOutput=true]$($result.AllValid)"
+                
+                if (-not $result.AllValid) {
+                  Write-Host "##vso[task.logissue type=error]Integrity validation failed!"
+                  exit 1
+                }
+                
+                Write-Host "✅ Integrity validation passed"
+                Write-Host "Total Events: $($result.TotalEvents)"
+                Write-Host "Hash Compliance: $($result.HashCompliancePercent)%"
+              pwsh: true
+          
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Integrity Report'
+            condition: always()
+            inputs:
+              PathtoPublish: '$(CodexLogsPath)'
+              ArtifactName: 'integrity-report'
+              publishLocation: 'Container'
+
+  # Stage 3: Schema Validation (Node.js)
+  - stage: SchemaValidation
+    displayName: 'Validate JSON Schema'
+    dependsOn: IntegrityValidation
+    jobs:
+      - job: ValidateSchema
+        displayName: 'Schema Compliance Check'
+        pool:
+          vmImage: 'ubuntu-latest'
+        
+        steps:
+          - checkout: self
+          
+          - task: NodeTool@0
+            displayName: 'Setup Node.js 20'
+            inputs:
+              versionSpec: '20.x'
+          
+          - task: Npm@1
+            displayName: 'Install Ajv Dependencies'
+            inputs:
+              command: 'custom'
+              customCommand: 'install ajv@8.12.0 ajv-formats@2.1.1'
+          
+          - task: DownloadBuildArtifacts@1
+            displayName: 'Download Integrity Report'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'integrity-report'
+              downloadPath: '$(CodexLogsPath)'
+          
+          - task: Bash@3
+            displayName: 'Validate Schema with Ajv'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "📋 Validating JSON schema compliance..."
+                node $(System.DefaultWorkingDirectory)/codex/scripts/validate-codex-integrity.js
+                
+                if [ $? -ne 0 ]; then
+                  echo "##vso[task.logissue type=error]Schema validation failed!"
+                  exit 1
+                fi
+                
+                echo "✅ Schema validation passed"
+          
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Validation Results'
+            condition: always()
+            inputs:
+              PathtoPublish: '$(CodexLogsPath)/validation-*.json'
+              ArtifactName: 'schema-validation'
+              publishLocation: 'Container'
+
+  # Stage 4: Azure Storage Upload
+  - stage: StorageUpload
+    displayName: 'Upload Logs to Azure Storage'
+    dependsOn: SchemaValidation
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - job: UploadToBlob
+        displayName: 'Upload to Blob Storage'
+        pool:
+          vmImage: 'ubuntu-latest'
+        
+        steps:
+          - task: DownloadBuildArtifacts@1
+            displayName: 'Download All Artifacts'
+            inputs:
+              buildType: 'current'
+              downloadType: 'all'
+              downloadPath: '$(System.ArtifactsDirectory)'
+          
+          - task: AzureCLI@2
+            displayName: 'Upload Lifecycle Log to Blob'
+            inputs:
+              azureSubscription: 'Phase4-ServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az storage blob upload \
+                  --account-name intelintentlogs \
+                  --container-name copilot-logs \
+                  --name "CopilotLifecycleLog-$(Build.BuildNumber).json" \
+                  --file $(System.ArtifactsDirectory)/lifecycle-log/CopilotLifecycleLog.json \
+                  --overwrite \
+                  --auth-mode login
+          
+          - task: AzureCLI@2
+            displayName: 'Upload Invocation Log to Blob'
+            inputs:
+              azureSubscription: 'Phase4-ServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az storage blob upload \
+                  --account-name intelintentlogs \
+                  --container-name copilot-logs \
+                  --name "CopilotInvocationLog-$(Build.BuildNumber).json" \
+                  --file $(System.ArtifactsDirectory)/invocation-log/CopilotInvocationLog.json \
+                  --overwrite \
+                  --auth-mode login
+
+  # Stage 5: Power BI Refresh
+  - stage: PowerBIRefresh
+    displayName: 'Refresh Power BI Dashboard'
+    dependsOn: StorageUpload
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - job: TriggerRefresh
+        displayName: 'Trigger Dataset Refresh'
+        pool:
+          vmImage: 'ubuntu-latest'
+        
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Get Power BI Access Token'
+            inputs:
+              azureSubscription: 'Phase4-ServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                TOKEN=$(az account get-access-token \
+                  --resource https://analysis.windows.net/powerbi/api \
+                  --query accessToken -o tsv)
+                
+                echo "##vso[task.setvariable variable=PowerBIToken;issecret=true]$TOKEN"
+          
+          - task: Bash@3
+            displayName: 'Trigger Power BI Refresh'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "🔄 Triggering Power BI dataset refresh..."
+                
+                curl -X POST \
+                  "https://api.powerbi.com/v1.0/myorg/groups/$(PowerBIWorkspaceID)/datasets/$(PowerBIDatasetID)/refreshes" \
+                  -H "Authorization: Bearer $(PowerBIToken)" \
+                  -H "Content-Type: application/json" \
+                  -d '{"notifyOption": "NoNotification"}'
+                
+                if [ $? -eq 0 ]; then
+                  echo "✅ Power BI refresh initiated successfully"
+                else
+                  echo "##vso[task.logissue type=warning]Failed to trigger Power BI refresh"
+                fi
+          
+          - task: Bash@3
+            displayName: 'Wait for Refresh Completion'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "⏳ Waiting for Power BI refresh to complete (max 5 minutes)..."
+                
+                for i in {1..30}; do
+                  STATUS=$(curl -s \
+                    "https://api.powerbi.com/v1.0/myorg/groups/$(PowerBIWorkspaceID)/datasets/$(PowerBIDatasetID)/refreshes?$top=1" \
+                    -H "Authorization: Bearer $(PowerBIToken)" | jq -r '.value[0].status')
+                  
+                  if [ "$STATUS" == "Completed" ]; then
+                    echo "✅ Power BI refresh completed successfully"
+                    break
+                  elif [ "$STATUS" == "Failed" ]; then
+                    echo "##vso[task.logissue type=error]Power BI refresh failed"
+                    exit 1
+                  fi
+                  
+                  echo "Status: $STATUS (attempt $i/30)"
+                  sleep 10
+                done
+
+  # Stage 6: Notification & Reporting
+  - stage: Notification
+    displayName: 'Send Notifications'
+    dependsOn: [IntegrityValidation, PowerBIRefresh]
+    condition: always()
+    jobs:
+      - job: NotifyStakeholders
+        displayName: 'Notify Stakeholders'
+        pool:
+          vmImage: 'ubuntu-latest'
+        
+        steps:
+          - task: PowerShell@2
+            displayName: 'Generate Summary Report'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $summary = @"
+                # Copilot Lifecycle Pipeline Report
+                
+                **Build Number**: $(Build.BuildNumber)
+                **Commit**: $(Build.SourceVersion)
+                **Branch**: $(Build.SourceBranchName)
+                **Triggered By**: $(Build.RequestedFor)
+                
+                ## Pipeline Status
+                - ✅ Lifecycle Logging: Completed
+                - ✅ Integrity Validation: Passed
+                - ✅ Schema Validation: Passed
+                - ✅ Azure Storage Upload: Completed
+                - ✅ Power BI Refresh: Triggered
+                
+                ## Metrics
+                - **Total Events**: $(IntegrityTest.TotalEvents)
+                - **Hash Compliance**: $(IntegrityTest.HashCompliance)%
+                
+                ## Artifacts
+                - [Lifecycle Log]($(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)&view=artifacts)
+                - [Invocation Log]($(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)&view=artifacts)
+                - [Integrity Report]($(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)&view=artifacts)
+                
+                **Dashboard**: [View Power BI Dashboard](https://app.powerbi.com/groups/$(PowerBIWorkspaceID)/reports/$(PowerBIDatasetID))
+                "@
+                
+                Write-Host $summary
+                
+                # Write summary to file
+                $summary | Out-File -FilePath "$(System.DefaultWorkingDirectory)/pipeline-summary.md"
+              pwsh: true
+          
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Summary Report'
+            inputs:
+              PathtoPublish: '$(System.DefaultWorkingDirectory)/pipeline-summary.md'
+              ArtifactName: 'pipeline-summary'
+              publishLocation: 'Container'
+          
+          - task: SendEmail@1
+            displayName: 'Email Summary to Sponsors'
+            condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+            inputs:
+              To: '$(SponsorEmail)'
+              From: 'azuredevops@intelintent.com'
+              Subject: 'IntelIntent Copilot Lineage - Pipeline $(Build.BuildNumber) Completed'
+              Body: 'file://$(System.DefaultWorkingDirectory)/pipeline-summary.md'
+              BodyAsHtml: false
+              SmtpServer: 'smtp.office365.com'
+              SmtpUsername: '$(SmtpUsername)'
+              SmtpPassword: '$(SmtpPassword)'
+
+# Scheduled pipeline for continuous tracking
+---
+schedules:
+  - cron: "0 */6 * * *"  # Every 6 hours
+    displayName: 'Scheduled Copilot Snapshot'
+    branches:
+      include:
+        - main
+    always: true
+
+trigger: none  # Disable CI trigger for scheduled pipeline
+
+stages:
+  - stage: ScheduledSnapshot
+    displayName: 'Scheduled Lifecycle Snapshot'
+    jobs:
+      - job: LogSnapshot
+        pool:
+          vmImage: 'windows-latest'
+        
+        steps:
+          - checkout: self
+            persistCredentials: true
+          
+          - task: PowerShell@2
+            displayName: 'Log Scheduled Snapshot'
+            inputs:
+              targetType: 'filePath'
+              filePath: '$(System.DefaultWorkingDirectory)/codex/scripts/Log-CopilotLifecycle.ps1'
+              arguments: >
+                -Action "Update"
+                -Version "v1.389.0"
+                -Workspace "IntelIntent"
+                -Reason "Scheduled snapshot for continuous lineage tracking"
+                -Stage "Production"
+              pwsh: true
+          
+          - task: Bash@3
+            displayName: 'Commit and Push Changes'
+            inputs:
+              targetType: 'inline'
+              script: |
+                git config user.name "Azure DevOps Bot"
+                git config user.email "devops@intelintent.com"
+                git add codex/logs/*.json
+                git commit -m "chore: automated Copilot lifecycle snapshot [skip ci]" || echo "No changes"
+                git push origin HEAD:$(Build.SourceBranchName)

@@ -1,0 +1,22 @@
+{
+  "intents": [
+    {
+      "name": "FamilyIntent",
+      "description": "Intent related to family interactions and activities.",
+      "parameters": {
+        "member": {
+          "type": "string",
+          "description": "Family member involved in the intent."
+        },
+        "activity": {
+          "type": "string",
+          "description": "Activity related to the family member."
+        },
+        "time": {
+          "type": "string",
+          "description": "Time for the planned activity."
+        }
+      }
+    }
+  ]
+}

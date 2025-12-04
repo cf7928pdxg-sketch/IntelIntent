@@ -1,0 +1,48 @@
+{
+  "name": "family-root-node",
+  "version": "1.0.0",
+  "type": "root",
+  "domain": "Family",
+  "metadata": {
+    "pa_id": "${PA_ID}",
+    "description": "Family domain root node for IntentON framework",
+    "author": "IntentON System",
+    "created": "${TIMESTAMP}",
+    "recursive": true
+  },
+  "packaging": {
+    "format": "zippit",
+    "compression": "gzip",
+    "include": ["init_node.py", "intent_manifest.json", "config.yaml", "modules/**/*.py"],
+    "exclude": ["**/__pycache__", "*.pyc", ".env"]
+  },
+  "components": {
+    "core": {"path": "./modules/core", "version": "^1.0.0", "required": true},
+    "identity": {"path": "./modules/identity", "version": "^1.0.0", "required": true},
+    "orchestration": {"path": "./modules/orchestration", "version": "^1.0.0", "required": false}
+  },
+  "dependencies": {
+    "azure-identity": "^1.14.0",
+    "msal": "^1.24.0",
+    "msgraph-core": "^1.0.0",
+    "pyyaml": "^6.0",
+    "cryptography": "^41.0.0"
+  },
+  "orchestration": {
+    "strategy": "recursive",
+    "max_depth": 10,
+    "delegation": {"enabled": true, "inherit_permissions": true, "scope_reduction": true},
+    "lifecycle": {
+      "init": "init_node.py",
+      "validate": "modules/validation/validator.py",
+      "deploy": "modules/deployment/deployer.py",
+      "teardown": "modules/cleanup/cleaner.py"
+    }
+  },
+  "security": {
+    "authentication": "microsoft-entra-id",
+    "authorization": "rbac",
+    "encryption": "aes-256-gcm",
+    "audit_logging": true
+  }
+}

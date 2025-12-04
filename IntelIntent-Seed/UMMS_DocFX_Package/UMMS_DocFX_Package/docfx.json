@@ -1,0 +1,41 @@
+{
+  "$schema": "https://dotnet.github.io/docfx/schemas/docfx.json",
+  "build": {
+    "content": [
+      {
+        "files": [
+          "docs/**.md",
+          "docs/**/toc.yml",
+          "README.md",
+          "index.md"
+        ]
+      },
+      {
+        "files": [
+          "domains/**.md",
+          "domains/**/toc.yml"
+        ],
+        "exclude": [
+          "**/adr/**",
+          "**/runbooks/**"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ]
+      }
+    ],
+    "globalMetadata": {
+      "_appTitle": "UMMS Catalog",
+      "_appFooter": "\u00a9 {year} Nic \u2014 Unified Microsoft Modernization System",
+      "_enableSearch": true
+    },
+    "template": [
+      "default"
+    ],
+    "dest": "_site"
+  }
+}

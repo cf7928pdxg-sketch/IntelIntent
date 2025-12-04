@@ -1,0 +1,21 @@
+node_name: FamilyNode
+description: Configuration settings for the Family domain
+settings:
+  max_children: 5
+  timeout: 30
+  logging:
+    level: INFO
+    file: family_node.log
+  intents:
+    - name: FamilyIntent1
+      parameters:
+        - name: member
+          type: string
+        - name: action
+          type: string
+    - name: FamilyIntent2
+      parameters:
+        - name: event
+          type: string
+        - name: date
+          type: string

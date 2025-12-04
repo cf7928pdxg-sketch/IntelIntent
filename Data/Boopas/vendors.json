@@ -1,0 +1,52 @@
+{
+  "vendors": [
+    {
+      "id": "VEN-001",
+      "name": "Local Bakery Supply",
+      "category": "Bakery Ingredients",
+      "contact": {
+        "name": "Maria Santos",
+        "phone": "555-0101",
+        "email": "maria@localbakery.com"
+      },
+      "paymentTerms": "Net 30",
+      "outstandingBalance": 400.0,
+      "lastOrderDate": "2025-11-25",
+      "lastPaymentDate": "2025-11-30",
+      "status": "active"
+    },
+    {
+      "id": "VEN-002",
+      "name": "Coffee Distributors Inc",
+      "category": "Beverages",
+      "contact": {
+        "name": "John Rodriguez",
+        "phone": "555-0102",
+        "email": "john@coffeedist.com"
+      },
+      "paymentTerms": "Net 15",
+      "outstandingBalance": 450.0,
+      "lastOrderDate": "2025-11-28",
+      "lastPaymentDate": "2025-11-22",
+      "status": "active"
+    },
+    {
+      "id": "VEN-003",
+      "name": "Dairy Wholesale Co",
+      "category": "Dairy Products",
+      "contact": {
+        "name": "Sarah Chen",
+        "phone": "555-0103",
+        "email": "sarah@dairywholesale.com"
+      },
+      "paymentTerms": "Net 30",
+      "outstandingBalance": 275.0,
+      "lastOrderDate": "2025-11-27",
+      "lastPaymentDate": "2025-11-18",
+      "status": "active"
+    }
+  ],
+  "lastUpdated": "2025-12-01T03:56:37Z"
+}
+
+

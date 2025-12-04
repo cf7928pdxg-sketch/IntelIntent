@@ -1,0 +1,204 @@
+{
+  "transactions": [
+    {
+      "id": "TXN-20251130-001",
+      "timestamp": "2025-11-30T08:15:00Z",
+      "items": [
+        {
+          "sku": "BAGEL-001",
+          "name": "Everything Bagel",
+          "quantity": 2,
+          "unitPrice": 2.5,
+          "total": 5.0
+        },
+        {
+          "sku": "COFFEE-001",
+          "name": "Regular Coffee",
+          "quantity": 1,
+          "unitPrice": 3.0,
+          "total": 3.0
+        }
+      ],
+      "subtotal": 8.0,
+      "tax": 0.64,
+      "total": 8.64,
+      "paymentMethod": "credit_card",
+      "status": "completed"
+    },
+    {
+      "id": "TXN-20251130-002",
+      "timestamp": "2025-11-30T09:30:00Z",
+      "items": [
+        {
+          "sku": "BAGEL-002",
+          "name": "Plain Bagel",
+          "quantity": 6,
+          "unitPrice": 2.0,
+          "total": 12.0
+        },
+        {
+          "sku": "CREAM-001",
+          "name": "Plain Cream Cheese",
+          "quantity": 2,
+          "unitPrice": 1.5,
+          "total": 3.0
+        }
+      ],
+      "subtotal": 15.0,
+      "tax": 1.2,
+      "total": 16.2,
+      "paymentMethod": "cash",
+      "status": "completed"
+    },
+    {
+      "id": "TXN-20251130-003",
+      "timestamp": "2025-11-30T10:45:00Z",
+      "items": [
+        {
+          "sku": "BAGEL-001",
+          "name": "Everything Bagel",
+          "quantity": 1,
+          "unitPrice": 2.5,
+          "total": 2.5
+        },
+        {
+          "sku": "COFFEE-002",
+          "name": "Latte",
+          "quantity": 1,
+          "unitPrice": 4.5,
+          "total": 4.5
+        }
+      ],
+      "subtotal": 7.0,
+      "tax": 0.56,
+      "total": 7.56,
+      "paymentMethod": "credit_card",
+      "status": "completed"
+    },
+    {
+      "id": "TXN-20251130-004",
+      "tax": 1.32,
+      "items": [
+        {
+          "quantity": 3,
+          "name": "Everything Bagel",
+          "total": 7.5,
+          "sku": "BAGEL-001",
+          "unitPrice": 2.5
+        },
+        {
+          "quantity": 2,
+          "name": "Latte",
+          "total": 9.0,
+          "sku": "COFFEE-002",
+          "unitPrice": 4.5
+        }
+      ],
+      "status": "completed",
+      "paymentMethod": "credit_card",
+      "subtotal": 16.5,
+      "total": 17.82,
+      "timestamp": "2025-12-01T03:25:20Z"
+    },
+    {
+      "status": "completed",
+      "items": [
+        {
+          "total": 2.5,
+          "sku": "BAGEL-001",
+          "unitPrice": 2.5,
+          "name": "Everything Bagel",
+          "quantity": 1
+        }
+      ],
+      "id": "TXN-20251130-005",
+      "total": 2.7,
+      "paymentMethod": "cash",
+      "subtotal": 2.5,
+      "tax": 0.2,
+      "timestamp": "2025-12-01T03:44:04Z"
+    },
+    {
+      "paymentMethod": "cash",
+      "id": "TXN-20251130-006",
+      "status": "completed",
+      "timestamp": "2025-12-01T03:52:24Z",
+      "tax": 0.2,
+      "subtotal": 2.5,
+      "total": 2.7,
+      "items": [
+        {
+          "total": 2.5,
+          "unitPrice": 2.5,
+          "sku": "BAGEL-001",
+          "name": "Everything Bagel",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "paymentMethod": "cash",
+      "id": "TXN-20251130-007",
+      "status": "completed",
+      "timestamp": "2025-12-01T03:52:41Z",
+      "tax": 0.2,
+      "subtotal": 2.5,
+      "total": 2.7,
+      "items": [
+        {
+          "total": 2.5,
+          "unitPrice": 2.5,
+          "sku": "BAGEL-001",
+          "name": "Everything Bagel",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "paymentMethod": "cash",
+      "id": "TXN-20251130-008",
+      "status": "completed",
+      "timestamp": "2025-12-01T03:53:58Z",
+      "tax": 0.2,
+      "subtotal": 2.5,
+      "total": 2.7,
+      "items": [
+        {
+          "total": 2.5,
+          "unitPrice": 2.5,
+          "sku": "BAGEL-001",
+          "name": "Everything Bagel",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "paymentMethod": "cash",
+      "id": "TXN-20251130-009",
+      "status": "completed",
+      "timestamp": "2025-12-01T03:56:37Z",
+      "tax": 0.2,
+      "subtotal": 2.5,
+      "total": 2.7,
+      "items": [
+        {
+          "total": 2.5,
+          "unitPrice": 2.5,
+          "sku": "BAGEL-001",
+          "name": "Everything Bagel",
+          "quantity": 1
+        }
+      ]
+    }
+  ],
+  "lastUpdated": "2025-12-01T03:56:37Z"
+}
+
+
+
+
+
+
+
+
+

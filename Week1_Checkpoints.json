@@ -1,0 +1,423 @@
+{
+  "StartTime": "2025-12-01T01:05:04Z",
+  "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+  "Checkpoints": [
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [
+        "bicep/keyvault.bicep"
+      ],
+      "Duration": 0,
+      "Inputs": {
+        "VaultName": "IntelIntentSecrets",
+        "ResourceGroup": "Phase4RG"
+      },
+      "Outputs": {},
+      "TaskID": "VAULT-001",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:03Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {
+        "SecretNames": [
+          "GRAPH_CLIENT_ID",
+          "GRAPH_CLIENT_SECRET",
+          "GRAPH_TENANT_ID"
+        ]
+      },
+      "Outputs": {},
+      "TaskID": "VAULT-002",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:03Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {
+        "SecretNames": [
+          "AZURE_OPENAI_ENDPOINT",
+          "AZURE_OPENAI_API_KEY"
+        ]
+      },
+      "Outputs": {},
+      "TaskID": "VAULT-003",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {
+        "SecretNames": [
+          "AZURE_SPEECH_KEY",
+          "AZURE_SPEECH_REGION"
+        ]
+      },
+      "Outputs": {},
+      "TaskID": "VAULT-004",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {
+        "IdentityName": "IntelIntentOrchestratorIdentity"
+      },
+      "Outputs": {},
+      "TaskID": "VAULT-005",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "VAULT-006",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {
+        "RoleCount": 4
+      },
+      "Outputs": {},
+      "TaskID": "RBAC-001",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {
+        "Groups": [
+          "Admin",
+          "Developer",
+          "Sponsor",
+          "Auditor"
+        ]
+      },
+      "Outputs": {},
+      "TaskID": "RBAC-002",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "RBAC-003",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {
+        "Modules": 5
+      },
+      "Outputs": {},
+      "TaskID": "RBAC-004",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "RBAC-005",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [
+        "Cert:\\CurrentUser\\My\\<Thumbprint>"
+      ],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "CERT-001",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [
+        "GraphCert.cer",
+        "GraphCert.pfx"
+      ],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "CERT-002",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "CERT-003",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {
+        "CertificateFile": "GraphCert.pfx"
+      },
+      "Outputs": {},
+      "TaskID": "CERT-004",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "CERT-005",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "CERT-006",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "CIRCUIT-001",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "CIRCUIT-002",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "CIRCUIT-003",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "CIRCUIT-004",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "CIRCUIT-005",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "CIRCUIT-006",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "HEALTH-001",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "HEALTH-002",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "HEALTH-003",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {
+        "AppName": "HealthCheckInsights"
+      },
+      "Outputs": {},
+      "TaskID": "HEALTH-004",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "HEALTH-005",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "HEALTH-006",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "VALIDATE-001",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "VALIDATE-002",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "VALIDATE-003",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "VALIDATE-004",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    },
+    {
+      "SessionID": "Phase4-Week1-c543df6d-5fa4-4015-88bf-c2940938fbc4",
+      "Artifacts": [],
+      "Duration": 0,
+      "Inputs": {},
+      "Outputs": {},
+      "TaskID": "VALIDATE-005",
+      "Status": "Skipped",
+      "Signature": "[Pending SHA256]",
+      "Timestamp": "2025-12-01T01:05:04Z"
+    }
+  ]
+}

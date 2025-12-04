@@ -1,0 +1,300 @@
+{
+  "manifest": {
+    "name": "IntelIntent Component Generation Manifest",
+    "version": "2.0.0",
+    "description": "Sample manifest demonstrating semantic priority, dependencies, and CoE component structure",
+    "author": "IntelIntent Orchestration System",
+    "created": "2025-11-26"
+  },
+  "checklist": [
+    {
+      "id": "ENV-001",
+      "title": "Environment Variable Configuration",
+      "description": "Set up system and user environment variables for IntelIntent operation",
+      "category": "Environment_Setup",
+      "priority": 1,
+      "status": "not-started",
+      "dependencies": [],
+      "tags": ["configuration", "prerequisites"],
+      "estimatedDuration": "5 minutes",
+      "semanticTrigger": {
+        "type": "prerequisite",
+        "condition": "Must complete before any other components",
+        "verification": "Test-Path env:INTELINTENT_HOME"
+      }
+    },
+    {
+      "id": "ENV-002",
+      "title": "PowerShell Module Path Setup",
+      "description": "Configure PowerShell module paths to include IntelIntent modules",
+      "category": "Environment_Setup",
+      "priority": 2,
+      "status": "not-started",
+      "dependencies": ["ENV-001"],
+      "tags": ["configuration", "powershell"],
+      "estimatedDuration": "3 minutes",
+      "semanticTrigger": {
+        "type": "configuration",
+        "condition": "Requires ENV-001 completion",
+        "verification": "$env:PSModulePath -like '*IntelIntent*'"
+      }
+    },
+    {
+      "id": "ID-001",
+      "title": "Entra ID Connection Validation",
+      "description": "Validate Microsoft Entra ID connectivity and authentication",
+      "category": "Identity_Modules",
+      "priority": 3,
+      "status": "not-started",
+      "dependencies": ["ENV-001", "ENV-002"],
+      "tags": ["identity", "authentication", "microsoft-graph"],
+      "estimatedDuration": "10 minutes",
+      "semanticTrigger": {
+        "type": "authentication",
+        "condition": "Requires environment setup",
+        "verification": "Test-EntraIDConnection",
+        "agentRoute": "IdentityAgent"
+      }
+    },
+    {
+      "id": "ID-002",
+      "title": "User Email Orchestration Setup",
+      "description": "Configure automated email workflows using Microsoft Graph API",
+      "category": "Identity_Modules",
+      "priority": 5,
+      "status": "not-started",
+      "dependencies": ["ID-001"],
+      "tags": ["identity", "email", "automation"],
+      "estimatedDuration": "15 minutes",
+      "semanticTrigger": {
+        "type": "orchestration",
+        "condition": "Requires Entra ID authentication",
+        "verification": "Test-GraphMailboxAccess",
+        "agentRoute": "IdentityAgent"
+      }
+    },
+    {
+      "id": "FIN-001",
+      "title": "Investment Dashboard Initialization",
+      "description": "Initialize financial dashboard with portfolio data sources",
+      "category": "Services",
+      "priority": 7,
+      "status": "not-started",
+      "dependencies": ["ENV-001", "ENV-002"],
+      "tags": ["finance", "dashboard", "investment"],
+      "estimatedDuration": "20 minutes",
+      "semanticTrigger": {
+        "type": "initialization",
+        "condition": "Requires environment configuration",
+        "verification": "Test-FinanceDashboard",
+        "agentRoute": "FinanceAgent"
+      }
+    },
+    {
+      "id": "FIN-002",
+      "title": "Market Event Semantic Triggers",
+      "description": "Configure semantic triggers for market events (price alerts, volatility)",
+      "category": "Services",
+      "priority": 8,
+      "status": "not-started",
+      "dependencies": ["FIN-001"],
+      "tags": ["finance", "automation", "semantic-triggers"],
+      "estimatedDuration": "15 minutes",
+      "semanticTrigger": {
+        "type": "event-driven",
+        "condition": "Requires dashboard initialization",
+        "verification": "Test-MarketTriggers",
+        "agentRoute": "FinanceAgent"
+      }
+    },
+    {
+      "id": "BOOPA-001",
+      "title": "Point-of-Sale Integration",
+      "description": "Integrate Boopa's Bagels POS system with IntelIntent",
+      "category": "Services",
+      "priority": 10,
+      "status": "not-started",
+      "dependencies": ["ENV-001"],
+      "tags": ["boopas", "pos", "integration"],
+      "estimatedDuration": "25 minutes",
+      "semanticTrigger": {
+        "type": "integration",
+        "condition": "Requires environment setup",
+        "verification": "Test-POSConnection",
+        "agentRoute": "BoopasAgent"
+      }
+    },
+    {
+      "id": "BOOPA-002",
+      "title": "Vendor Workflow Automation",
+      "description": "Automate vendor ordering and reconciliation workflows",
+      "category": "Services",
+      "priority": 11,
+      "status": "not-started",
+      "dependencies": ["BOOPA-001"],
+      "tags": ["boopas", "automation", "vendors"],
+      "estimatedDuration": "30 minutes",
+      "semanticTrigger": {
+        "type": "automation",
+        "condition": "Requires POS integration",
+        "verification": "Test-VendorWorkflows",
+        "agentRoute": "BoopasAgent"
+      }
+    },
+    {
+      "id": "DEPLOY-001",
+      "title": "Azure Tenancy Validation",
+      "description": "Validate Azure subscription and tenancy configuration",
+      "category": "Autopilot_Provisioning",
+      "priority": 4,
+      "status": "not-started",
+      "dependencies": ["ID-001"],
+      "tags": ["azure", "deployment", "validation"],
+      "estimatedDuration": "10 minutes",
+      "semanticTrigger": {
+        "type": "validation",
+        "condition": "Requires Entra ID authentication",
+        "verification": "Test-AzureConnection",
+        "agentRoute": "DeploymentAgent"
+      }
+    },
+    {
+      "id": "DEPLOY-002",
+      "title": "Environment Provisioning Pipeline",
+      "description": "Create automated provisioning pipeline for Dev/Staging/Prod",
+      "category": "Autopilot_Provisioning",
+      "priority": 6,
+      "status": "not-started",
+      "dependencies": ["DEPLOY-001"],
+      "tags": ["azure", "deployment", "automation"],
+      "estimatedDuration": "45 minutes",
+      "semanticTrigger": {
+        "type": "pipeline",
+        "condition": "Requires Azure tenancy validation",
+        "verification": "Test-ProvisioningPipeline",
+        "agentRoute": "DeploymentAgent"
+      }
+    },
+    {
+      "id": "MODAL-001",
+      "title": "Voice Command Integration",
+      "description": "Enable voice command processing with audio transcription",
+      "category": "Enhancements",
+      "priority": 12,
+      "status": "not-started",
+      "dependencies": ["ENV-001"],
+      "tags": ["modality", "voice", "transcription"],
+      "estimatedDuration": "30 minutes",
+      "semanticTrigger": {
+        "type": "multi-modal",
+        "condition": "Requires environment setup",
+        "verification": "Test-VoiceInput",
+        "agentRoute": "ModalityAgent"
+      }
+    },
+    {
+      "id": "MODAL-002",
+      "title": "Screen Capture and Analysis",
+      "description": "Implement screen capture with AI-powered content analysis",
+      "category": "Enhancements",
+      "priority": 13,
+      "status": "not-started",
+      "dependencies": ["MODAL-001"],
+      "tags": ["modality", "screen-capture", "ai"],
+      "estimatedDuration": "35 minutes",
+      "semanticTrigger": {
+        "type": "multi-modal",
+        "condition": "Requires voice integration",
+        "verification": "Test-ScreenCapture",
+        "agentRoute": "ModalityAgent"
+      }
+    },
+    {
+      "id": "CICD-001",
+      "title": "GitHub Actions Pipeline",
+      "description": "Configure CI/CD pipeline with GitHub Actions",
+      "category": "CI_CD_Workflows",
+      "priority": 9,
+      "status": "not-started",
+      "dependencies": ["DEPLOY-001"],
+      "tags": ["cicd", "github", "automation"],
+      "estimatedDuration": "40 minutes",
+      "semanticTrigger": {
+        "type": "pipeline",
+        "condition": "Requires Azure deployment setup",
+        "verification": "Test-GitHubActions"
+      }
+    },
+    {
+      "id": "SEC-001",
+      "title": "Security Gate Validation",
+      "description": "Implement security validation gates for all components",
+      "category": "Security_Validation",
+      "priority": 2,
+      "status": "not-started",
+      "dependencies": ["ENV-001"],
+      "tags": ["security", "validation", "gates"],
+      "estimatedDuration": "20 minutes",
+      "semanticTrigger": {
+        "type": "security",
+        "condition": "Prerequisite for all operations",
+        "verification": "Test-SecurityGates"
+      }
+    },
+    {
+      "id": "TOOL-001",
+      "title": "Developer Tooling Setup",
+      "description": "Configure VS Code extensions, Git, and development tools",
+      "category": "Tooling",
+      "priority": 3,
+      "status": "not-started",
+      "dependencies": ["ENV-001"],
+      "tags": ["tooling", "vscode", "git"],
+      "estimatedDuration": "15 minutes",
+      "semanticTrigger": {
+        "type": "configuration",
+        "condition": "Requires environment setup",
+        "verification": "Test-DeveloperTools"
+      }
+    }
+  ],
+  "semanticPriorityLegend": {
+    "1-3": "Prerequisites and Core Configuration",
+    "4-6": "Authentication and Deployment Foundation",
+    "7-9": "Service Integration and Automation",
+    "10-12": "Advanced Features and Multi-modal",
+    "13+": "Enhancements and Optimization"
+  },
+  "agentRouting": {
+    "IdentityAgent": ["ID-001", "ID-002"],
+    "FinanceAgent": ["FIN-001", "FIN-002"],
+    "BoopasAgent": ["BOOPA-001", "BOOPA-002"],
+    "DeploymentAgent": ["DEPLOY-001", "DEPLOY-002"],
+    "ModalityAgent": ["MODAL-001", "MODAL-002"],
+    "OrchestratorAgent": ["All components"]
+  },
+  "dependencyGraph": {
+    "ENV-001": [],
+    "ENV-002": ["ENV-001"],
+    "SEC-001": ["ENV-001"],
+    "TOOL-001": ["ENV-001"],
+    "ID-001": ["ENV-001", "ENV-002"],
+    "DEPLOY-001": ["ID-001"],
+    "ID-002": ["ID-001"],
+    "DEPLOY-002": ["DEPLOY-001"],
+    "FIN-001": ["ENV-001", "ENV-002"],
+    "FIN-002": ["FIN-001"],
+    "CICD-001": ["DEPLOY-001"],
+    "BOOPA-001": ["ENV-001"],
+    "BOOPA-002": ["BOOPA-001"],
+    "MODAL-001": ["ENV-001"],
+    "MODAL-002": ["MODAL-001"]
+  },
+  "coePattern": {
+    "description": "Each component follows Center of Excellence (CoE) pattern",
+    "atomicDecomposition": true,
+    "semanticPriority": true,
+    "recursiveValidation": true,
+    "checkpointRequired": true
+  }
+}

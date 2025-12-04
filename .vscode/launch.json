@@ -1,0 +1,102 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "PowerShell: Launch Current File",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${file}",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "PowerShell: Week1 Automation (DryRun)",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${workspaceFolder}/Week1_Automation.ps1",
+            "args": [
+                "-DryRun",
+                "-SkipEmail"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "PowerShell: Week1 Automation (Live)",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${workspaceFolder}/Week1_Automation.ps1",
+            "args": [
+                "-SkipEmail"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "PowerShell: Orchestrator (Full)",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${workspaceFolder}/IntelIntent_Seeding/Orchestrator.ps1",
+            "args": [
+                "-Mode",
+                "Full",
+                "-Verbose"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "PowerShell: Orchestrator (DryRun)",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${workspaceFolder}/IntelIntent_Seeding/Orchestrator.ps1",
+            "args": [
+                "-Mode",
+                "Full",
+                "-DryRun"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "PowerShell: Interactive Launcher",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${workspaceFolder}/IntelIntent_Launcher.ps1",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "PowerShell: Pester Tests (Current File)",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "Invoke-Pester",
+            "args": [
+                "-Path",
+                "${file}",
+                "-Output",
+                "Detailed"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "PowerShell: Pester Tests (All)",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "Invoke-Pester",
+            "args": [
+                "-Output",
+                "Detailed"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "PowerShell: Attach to Process",
+            "type": "PowerShell",
+            "request": "attach",
+            "processId": "${command:PickPSHostProcess}",
+            "runspaceId": 1
+        },
+        {
+            "name": "PowerShell: Test Checkpoint Validation",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${workspaceFolder}/Test-CopilotLifecycleTracker.ps1",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

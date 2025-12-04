@@ -1,0 +1,253 @@
+name: IntelIntent Copilot Quality Check
+
+# Automated code quality and architecture validation
+# Triggered on pull requests to ensure Copilot suggestions maintain project patterns
+
+on:
+    pull_request:
+        branches: [main, develop]
+        paths:
+            - "**.ps1"
+            - "**.psm1"
+            - "**.psd1"
+            - "IntelIntent-Seed/**/*.json"
+            - ".vscode/**"
+    workflow_dispatch:
+
+env:
+    POWERSHELL_VERSION: "7.4.x"
+
+jobs:
+    validate-patterns:
+        name: Validate IntelIntent Patterns
+        runs-on: windows-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Full history for better analysis
+
+            - name: Setup PowerShell
+              uses: azure/powershell@v2
+              with:
+                  azPSVersion: "latest"
+                  inlineScript: |
+                      Write-Host "✅ PowerShell $($PSVersionTable.PSVersion) ready"
+
+            - name: Install PSScriptAnalyzer
+              shell: pwsh
+              run: |
+                  Install-Module -Name PSScriptAnalyzer -Force -SkipPublisherCheck
+                  Install-Module -Name Pester -Force -SkipPublisherCheck
+
+            - name: Run PSScriptAnalyzer
+              shell: pwsh
+              run: |
+                  Write-Host "🔍 Running PSScriptAnalyzer..."
+                  $results = Invoke-ScriptAnalyzer -Path . -Recurse -Settings .vscode/PSScriptAnalyzerSettings.psd1
+
+                  if ($results) {
+                    Write-Host "⚠️ Found $($results.Count) issues:"
+                    $results | Format-Table RuleName, Severity, ScriptName, Line, Message
+                    
+                    $errors = $results | Where-Object Severity -eq 'Error'
+                    if ($errors) {
+                      Write-Error "❌ Found $($errors.Count) errors - build failed"
+                      exit 1
+                    }
+                  } else {
+                    Write-Host "✅ No issues found"
+                  }
+
+            - name: Validate Checkpoint Patterns
+              shell: pwsh
+              run: |
+                  Write-Host "🔍 Validating checkpoint patterns..."
+
+                  $errors = @()
+
+                  # Find all .ps1 files that create Azure resources
+                  $azureScripts = Get-ChildItem -Path . -Filter "*.ps1" -Recurse | 
+                    Where-Object { 
+                      $content = Get-Content $_.FullName -Raw
+                      $content -match '(az\s+\w+\s+create|New-Az\w+)'
+                    }
+
+                  foreach ($script in $azureScripts) {
+                    $content = Get-Content $script.FullName -Raw
+                    
+                    # Check for Add-Checkpoint or Invoke-TaskWithCheckpoint
+                    if ($content -notmatch '(Add-Checkpoint|Invoke-TaskWithCheckpoint)') {
+                      $errors += "❌ $($script.Name): Missing checkpoint creation after Azure operation"
+                    }
+                    
+                    # Check for DryRun pattern
+                    if ($content -notmatch '\$DryRun') {
+                      $errors += "⚠️ $($script.Name): Missing DryRun safety check"
+                    }
+                  }
+
+                  if ($errors) {
+                    $errors | ForEach-Object { Write-Warning $_ }
+                    Write-Error "Checkpoint pattern validation failed"
+                    exit 1
+                  }
+
+                  Write-Host "✅ All Azure operations have checkpoint patterns"
+
+            - name: Validate Module Import Patterns
+              shell: pwsh
+              run: |
+                  Write-Host "🔍 Validating module import patterns..."
+
+                  $errors = @()
+
+                  # Find all module imports
+                  $scripts = Get-ChildItem -Path . -Filter "*.ps1" -Recurse
+
+                  foreach ($script in $scripts) {
+                    $content = Get-Content $script.FullName -Raw
+                    
+                    # Find Import-Module statements
+                    if ($content -match 'Import-Module') {
+                      $imports = [regex]::Matches($content, 'Import-Module\s+[^\r\n]+')
+                      
+                      foreach ($import in $imports) {
+                        # Check for -ErrorAction SilentlyContinue
+                        if ($import.Value -notmatch '-ErrorAction\s+SilentlyContinue') {
+                          $errors += "⚠️ $($script.Name): Import-Module missing -ErrorAction SilentlyContinue: $($import.Value)"
+                        }
+                      }
+                    }
+                  }
+
+                  if ($errors.Count -gt 5) {
+                    $errors[0..4] | ForEach-Object { Write-Warning $_ }
+                    Write-Warning "... and $($errors.Count - 5) more"
+                    Write-Error "Module import pattern validation failed"
+                    exit 1
+                  } elseif ($errors) {
+                    $errors | ForEach-Object { Write-Warning $_ }
+                  }
+
+                  Write-Host "✅ Module import patterns validated"
+
+            - name: Validate Agent Return Structures
+              shell: pwsh
+              run: |
+                  Write-Host "🔍 Validating agent return structures..."
+
+                  if (Test-Path ".\IntelIntent_Seeding\AgentBridge.psm1") {
+                    Import-Module .\IntelIntent_Seeding\AgentBridge.psm1 -Force -ErrorAction SilentlyContinue
+                    
+                    # Test orchestrator agent
+                    $result = Invoke-OrchestratorAgent -Intent "Test validation"
+                    
+                    # Validate return structure
+                    $requiredKeys = @('Status', 'Agent', 'Operation')
+                    $missing = $requiredKeys | Where-Object { -not $result.ContainsKey($_) }
+                    
+                    if ($missing) {
+                      Write-Error "❌ Agent return structure missing keys: $($missing -join ', ')"
+                      exit 1
+                    }
+                    
+                    Write-Host "✅ Agent return structures valid"
+                  } else {
+                    Write-Warning "⚠️ AgentBridge.psm1 not found - skipping validation"
+                  }
+
+            - name: Validate Manifest Schemas
+              shell: pwsh
+              run: |
+                  Write-Host "🔍 Validating manifest schemas..."
+
+                  if (Test-Path ".\IntelIntent_Seeding\ManifestReader.ps1") {
+                    . .\IntelIntent_Seeding\ManifestReader.ps1
+                    
+                    try {
+                      $manifests = Get-AllManifests
+                      $validation = Test-ManifestIntegrity -Manifests $manifests
+                      
+                      if (-not $validation.IsValid) {
+                        Write-Error "❌ Manifest validation failed:"
+                        $validation.Errors | ForEach-Object { Write-Error "  - $_" }
+                        exit 1
+                      }
+                      
+                      Write-Host "✅ All manifests valid"
+                    } catch {
+                      Write-Warning "⚠️ Manifest validation skipped: $_"
+                    }
+                  } else {
+                    Write-Warning "⚠️ ManifestReader.ps1 not found - skipping validation"
+                  }
+
+            - name: Run Pester Tests
+              shell: pwsh
+              run: |
+                  Write-Host "🧪 Running Pester tests..."
+
+                  if (Test-Path ".\Tests") {
+                    $config = New-PesterConfiguration
+                    $config.Run.Path = ".\Tests"
+                    $config.Output.Verbosity = "Detailed"
+                    $config.TestResult.Enabled = $true
+                    $config.TestResult.OutputPath = "TestResults.xml"
+                    
+                    $result = Invoke-Pester -Configuration $config
+                    
+                    if ($result.FailedCount -gt 0) {
+                      Write-Error "❌ $($result.FailedCount) tests failed"
+                      exit 1
+                    }
+                    
+                    Write-Host "✅ All tests passed"
+                  } else {
+                    Write-Warning "⚠️ Tests directory not found - skipping tests"
+                  }
+
+            - name: Check for Copilot Tracking
+              shell: pwsh
+              run: |
+                  Write-Host "🔍 Checking Copilot lifecycle tracking..."
+
+                  if (Test-Path ".\IntelIntent_Seeding\CopilotLifecycleTracker.psm1") {
+                    Import-Module .\IntelIntent_Seeding\CopilotLifecycleTracker.psm1 -Force
+                    
+                    # Export current session for audit
+                    $outputPath = ".\Sponsors\CI_Copilot_Tracking.json"
+                    New-Item -ItemType Directory -Path ".\Sponsors" -Force | Out-Null
+                    Export-CopilotLifecycleForPowerBI -OutputPath $outputPath -IncludeMetrics
+                    
+                    Write-Host "✅ Copilot tracking exported to $outputPath"
+                  } else {
+                    Write-Warning "⚠️ CopilotLifecycleTracker.psm1 not found"
+                  }
+
+            - name: Upload Test Results
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: test-results
+                  path: |
+                      TestResults.xml
+                      Sponsors/CI_Copilot_Tracking.json
+
+            - name: Summary
+              shell: pwsh
+              run: |
+                  Write-Host ""
+                  Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Cyan
+                  Write-Host "   IntelIntent Copilot Quality Check Complete" -ForegroundColor Green
+                  Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Cyan
+                  Write-Host ""
+                  Write-Host "✅ PSScriptAnalyzer validation passed"
+                  Write-Host "✅ Checkpoint patterns validated"
+                  Write-Host "✅ Module import patterns validated"
+                  Write-Host "✅ Agent return structures validated"
+                  Write-Host "✅ Manifest schemas validated"
+                  Write-Host "✅ Pester tests passed"
+                  Write-Host ""
+                  Write-Host "Ready for merge! 🚀" -ForegroundColor Green

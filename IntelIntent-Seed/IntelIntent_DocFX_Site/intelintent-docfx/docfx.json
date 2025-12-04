@@ -1,0 +1,44 @@
+{
+  "build": {
+    "content": [
+      {
+        "files": [
+          "index.md",
+          "toc.yml"
+        ]
+      },
+      {
+        "src": "articles",
+        "files": [
+          "**/*.md",
+          "toc.yml"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "src": "images",
+        "files": [
+          "**/*.*"
+        ]
+      },
+      {
+        "src": "downloads",
+        "files": [
+          "**/*.*"
+        ]
+      }
+    ],
+    "template": [
+      "default",
+      "modern",
+      "templates/intelintent-template"
+    ],
+    "globalMetadata": {
+      "_appTitle": "IntelIntent",
+      "_appName": "IntelIntent",
+      "_appFooter": "IntelIntent - Simplifying life today, empowering collaboration tomorrow, creating a legacy of intelligence for future generations.",
+      "_enableSearch": true
+    }
+  }
+}

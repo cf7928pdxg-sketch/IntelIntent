@@ -1,0 +1,157 @@
+name: Pester Unit Tests
+
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main, develop]
+    workflow_dispatch:
+
+jobs:
+    test:
+        name: Run Pester Tests
+        runs-on: windows-latest
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
+            - name: Setup PowerShell 7
+              uses: actions/setup-powershell@v1
+
+            - name: Install Pester
+              shell: pwsh
+              run: |
+                  Install-Module -Name Pester -Force -SkipPublisherCheck -MinimumVersion 5.5.0
+                  Import-Module Pester -PassThru
+
+            - name: Run All Tests with Code Coverage
+              shell: pwsh
+              run: |
+                  $config = New-PesterConfiguration
+                  $config.Run.Path = './Tests'
+                  $config.Run.PassThru = $true
+                  $config.Output.Verbosity = 'Detailed'
+
+                  # Code coverage for helper modules
+                  $config.CodeCoverage.Enabled = $true
+                  $config.CodeCoverage.Path = @(
+                    './IntelIntent_Seeding/FinanceDataHelper.psm1',
+                    './IntelIntent_Seeding/BoopasDataHelper.psm1',
+                    './IntelIntent_Seeding/AgentBridge.psm1'
+                  )
+                  $config.CodeCoverage.OutputFormat = 'JaCoCo'
+                  $config.CodeCoverage.OutputPath = './coverage.xml'
+
+                  # Test results
+                  $config.TestResult.Enabled = $true
+                  $config.TestResult.OutputFormat = 'NUnitXml'
+                  $config.TestResult.OutputPath = './test-results.xml'
+
+                  $result = Invoke-Pester -Configuration $config
+
+                  # Fail build if tests fail
+                  if ($result.FailedCount -gt 0) {
+                    throw "$($result.FailedCount) tests failed"
+                  }
+
+            - name: Upload Test Results
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: test-results
+                  path: test-results.xml
+
+            - name: Upload Code Coverage
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: code-coverage
+                  path: coverage.xml
+
+            - name: Publish Test Results
+              uses: EnricoMi/publish-unit-test-result-action/windows@v2
+              if: always()
+              with:
+                  files: test-results.xml
+
+            - name: Code Coverage Summary
+              shell: pwsh
+              if: always()
+              run: |
+                  if (Test-Path './coverage.xml') {
+                    [xml]$coverage = Get-Content './coverage.xml'
+                    $report = $coverage.report.counter | Where-Object { $_.type -eq 'LINE' }
+                    $covered = [int]$report.covered
+                    $missed = [int]$report.missed
+                    $total = $covered + $missed
+                    $percentage = if ($total -gt 0) { [Math]::Round(($covered / $total) * 100, 2) } else { 0 }
+                    
+                    Write-Host "📊 Code Coverage Summary:" -ForegroundColor Cyan
+                    Write-Host "  Lines Covered: $covered / $total ($percentage%)" -ForegroundColor Green
+                    Write-Host "  Lines Missed: $missed" -ForegroundColor Yellow
+                    
+                    # Add to GitHub Step Summary
+                    @"
+                    ## 📊 Code Coverage
+                    - **Lines Covered:** $covered / $total (**$percentage%**)
+                    - **Lines Missed:** $missed
+                    "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+                  }
+
+            - name: Test Summary
+              shell: pwsh
+              if: always()
+              run: |
+                  if (Test-Path './test-results.xml') {
+                    [xml]$testResults = Get-Content './test-results.xml'
+                    $total = [int]$testResults.'test-results'.total
+                    $passed = [int]$testResults.'test-results'.passed
+                    $failed = [int]$testResults.'test-results'.failures
+                    $skipped = [int]$testResults.'test-results'.inconclusive
+                    
+                    Write-Host "✅ Test Summary:" -ForegroundColor Cyan
+                    Write-Host "  Total Tests: $total" -ForegroundColor White
+                    Write-Host "  Passed: $passed" -ForegroundColor Green
+                    Write-Host "  Failed: $failed" -ForegroundColor $(if ($failed -gt 0) { 'Red' } else { 'Green' })
+                    Write-Host "  Skipped: $skipped" -ForegroundColor Yellow
+                    
+                    # Add to GitHub Step Summary
+                    @"
+                    ## ✅ Test Results
+                    - **Total Tests:** $total
+                    - **Passed:** ✅ $passed
+                    - **Failed:** $(if ($failed -gt 0) { "❌ $failed" } else { "✅ 0" })
+                    - **Skipped:** ⏭️ $skipped
+                    "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+                  }
+
+    lint:
+        name: PowerShell Script Analyzer
+        runs-on: windows-latest
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
+            - name: Install PSScriptAnalyzer
+              shell: pwsh
+              run: |
+                  Install-Module -Name PSScriptAnalyzer -Force -SkipPublisherCheck
+
+            - name: Run Script Analyzer
+              shell: pwsh
+              run: |
+                  $results = Invoke-ScriptAnalyzer -Path ./IntelIntent_Seeding/*.psm1 -Recurse
+
+                  if ($results.Count -gt 0) {
+                    Write-Host "⚠️ Script Analyzer Found Issues:" -ForegroundColor Yellow
+                    $results | Format-Table -AutoSize
+                    
+                    $errors = $results | Where-Object Severity -eq 'Error'
+                    if ($errors.Count -gt 0) {
+                      throw "$($errors.Count) errors found by PSScriptAnalyzer"
+                    }
+                  } else {
+                    Write-Host "✅ No issues found by PSScriptAnalyzer" -ForegroundColor Green
+                  }

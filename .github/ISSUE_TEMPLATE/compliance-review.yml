@@ -1,0 +1,223 @@
+name: 🔒 Compliance Review Request
+description: Quarterly compliance review for licensing, GDPR, and export regulations
+title: "[Compliance Review] Q[Quarter] [Year] - [Reviewer Name]"
+labels: ["compliance", "governance", "audit"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🔒 IntelIntent Compliance Review
+        
+        Use this template to request or document quarterly compliance reviews. All fields are required unless marked optional.
+        
+        **Before submitting:** Run `.\Governance\Verify-Compliance.ps1` and attach results.
+
+  - type: input
+    id: review-date
+    attributes:
+      label: Review Date
+      description: Date this compliance review was conducted
+      placeholder: "2025-11-30"
+    validations:
+      required: true
+
+  - type: input
+    id: reviewer-name
+    attributes:
+      label: Reviewer Name
+      description: Name and role of person conducting review
+      placeholder: "Jane Smith, Compliance Officer"
+    validations:
+      required: true
+
+  - type: input
+    id: review-period
+    attributes:
+      label: Review Period
+      description: Time period covered by this review
+      placeholder: "Q4 2025 (October - December)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: review-type
+    attributes:
+      label: Review Type
+      description: Select the type of compliance review
+      options:
+        - Monthly Review
+        - Quarterly Audit
+        - Annual Compliance Assessment
+        - Pre-Deployment Check
+        - Incident-Driven Review
+    validations:
+      required: true
+
+  - type: textarea
+    id: script-results
+    attributes:
+      label: Compliance Script Results
+      description: |
+        Paste output from `.\Governance\Verify-Compliance.ps1`
+        Include pass rate, warnings, and errors.
+      placeholder: |
+        ✅ Passed: 5 / 5 (100%)
+        ⚠️ Warnings: 0
+        ❌ Errors: 0
+      render: shell
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: license-attribution
+    attributes:
+      label: 1. License Attribution Check
+      description: Verify MIT license and copyright notices present
+      options:
+        - label: README.txt contains "MIT License" text
+        - label: LICENSE file exists with full MIT License text
+        - label: Microsoft Corporation attribution present
+        - label: VS Code extension licenses documented
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: usage-scope
+    attributes:
+      label: 2. Usage Scope Validation
+      description: Confirm ARM Tools used only in dev/test environments
+      options:
+        - label: INTELINTENT_ENVIRONMENT not set to "Production"
+        - label: No ARM Tools usage in production deployments
+        - label: Bicep migration plan documented (if applicable)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: gdpr-telemetry
+    attributes:
+      label: 3. GDPR & Telemetry Compliance
+      description: Verify data collection disclosure and settings
+      options:
+        - label: Telemetry settings reviewed (.vscode/settings.json)
+        - label: User disclosure provided if telemetry enabled
+        - label: dotnetAcquisitionExtension.enableTelemetry setting documented
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: export-compliance
+    attributes:
+      label: 4. Export Compliance (EAR/ITAR)
+      description: Validate deployment targets against restricted countries
+      options:
+        - label: No deployments to restricted regions (CN, RU, IR, KP, SY)
+        - label: Azure resource group locations verified
+        - label: Export compliance automation in place
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checkpoint-schema
+    attributes:
+      label: 5. Checkpoint Schema Audit
+      description: Verify cryptographic lineage and audit trail
+      options:
+        - label: Week1_Checkpoints.json schema valid
+        - label: All checkpoints have signature placeholders
+        - label: SessionID and timestamps present
+        - label: Audit trail complete and immutable
+    validations:
+      required: true
+
+  - type: dropdown
+    id: risk-level
+    attributes:
+      label: Overall Risk Assessment
+      description: Based on findings, what is the overall compliance risk level?
+      options:
+        - "🟢 Low - No significant issues"
+        - "🟡 Medium - Minor issues, action plan in place"
+        - "🟠 High - Major issues, immediate action required"
+        - "🔴 Critical - Severe violations, escalation needed"
+    validations:
+      required: true
+
+  - type: textarea
+    id: risk-summary
+    attributes:
+      label: Risk Summary
+      description: |
+        Summarize compliance risks identified during review.
+        Reference specific findings from script output.
+      placeholder: |
+        - License attribution missing in 2 files (medium risk)
+        - Telemetry enabled without user disclosure (high risk, GDPR)
+        - ARM Tools usage verified as dev/test only (low risk)
+    validations:
+      required: true
+
+  - type: textarea
+    id: action-items
+    attributes:
+      label: Action Items
+      description: |
+        List required corrective actions with deadlines and owners.
+        Use format: [Priority] Action - Deadline - Owner
+      placeholder: |
+        - [CRITICAL] Add GDPR telemetry disclosure - 7 days - Legal Team
+        - [HIGH] Update LICENSE file with extension notices - 14 days - Engineering
+        - [MEDIUM] Migrate remaining ARM templates to Bicep - 90 days - DevOps
+    validations:
+      required: true
+
+  - type: textarea
+    id: next-review
+    attributes:
+      label: Next Review Schedule
+      description: When should the next compliance review occur?
+      placeholder: |
+        - Next monthly review: 2025-12-30
+        - Next quarterly audit: 2026-01-31
+        - Special focus areas: Export compliance, Bicep migration progress
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: sign-off
+    attributes:
+      label: Sign-Off & Acknowledgment
+      description: Confirm review completion and accuracy
+      options:
+        - label: I have reviewed all compliance areas thoroughly
+        - label: Action items have been assigned and communicated
+        - label: Governance/Compliance_Summary.md has been updated if needed
+        - label: Results exported to Governance/Compliance_Verification_Results.json
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: Additional Notes (Optional)
+      description: Any other observations, concerns, or recommendations
+      placeholder: |
+        - Consider automating compliance checks in CI/CD pipeline
+        - Recommend quarterly training on license compliance for team
+        - New VS Code extensions should go through governance review first
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## 📚 Reference Documentation
+        
+        - [Compliance Summary](../../Governance/Compliance_Summary.md) - One-page governance bundle
+        - [Verify-Compliance.ps1](../../Governance/Verify-Compliance.ps1) - Automated verification script
+        - [Licensing Guidelines](../../.github/copilot-instructions.md#licensing--compliance-guidelines) - Detailed compliance section
+        - [Week 1 Checklist](../../WEEK1_IMPLEMENTATION_CHECKLIST.md) - Deployment compliance tasks
+        
+        **Questions?** Contact Governance Team or see [Compliance_Summary.md](../../Governance/Compliance_Summary.md) escalation paths.

@@ -1,0 +1,14 @@
+- name: Foundations
+  href: docs/00-foundations/
+- name: NGMI
+  href: docs/15-ngmi/
+- name: Domains
+  items:
+    - name: Personal
+      href: domains/personal/
+    - name: Family
+      href: domains/family/
+    - name: Business
+      href: domains/business/
+    - name: Shared Platform
+      href: domains/shared-platform/

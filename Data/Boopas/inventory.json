@@ -1,0 +1,93 @@
+{
+  "products": [
+    {
+      "sku": "BAGEL-001",
+      "name": "Everything Bagel",
+      "category": "Bagels",
+      "unitCost": 0.75,
+      "unitPrice": 2.5,
+      "quantityOnHand": 40,
+      "reorderPoint": 20,
+      "reorderQuantity": 100,
+      "supplier": "Local Bakery Supply"
+    },
+    {
+      "sku": "BAGEL-002",
+      "name": "Plain Bagel",
+      "category": "Bagels",
+      "unitCost": 0.6,
+      "unitPrice": 2.0,
+      "quantityOnHand": 36,
+      "reorderPoint": 20,
+      "reorderQuantity": 100,
+      "supplier": "Local Bakery Supply"
+    },
+    {
+      "sku": "BAGEL-003",
+      "name": "Cinnamon Raisin Bagel",
+      "category": "Bagels",
+      "unitCost": 0.8,
+      "unitPrice": 2.75,
+      "quantityOnHand": 24,
+      "reorderPoint": 15,
+      "reorderQuantity": 75,
+      "supplier": "Local Bakery Supply"
+    },
+    {
+      "sku": "COFFEE-001",
+      "name": "Regular Coffee",
+      "category": "Beverages",
+      "unitCost": 0.5,
+      "unitPrice": 3.0,
+      "quantityOnHand": 200,
+      "reorderPoint": 50,
+      "reorderQuantity": 300,
+      "supplier": "Coffee Distributors Inc"
+    },
+    {
+      "sku": "COFFEE-002",
+      "name": "Latte",
+      "category": "Beverages",
+      "unitCost": 1.25,
+      "unitPrice": 4.5,
+      "quantityOnHand": 148,
+      "reorderPoint": 40,
+      "reorderQuantity": 200,
+      "supplier": "Coffee Distributors Inc"
+    },
+    {
+      "sku": "CREAM-001",
+      "name": "Plain Cream Cheese",
+      "category": "Spreads",
+      "unitCost": 0.75,
+      "unitPrice": 1.5,
+      "quantityOnHand": 30,
+      "reorderPoint": 10,
+      "reorderQuantity": 50,
+      "supplier": "Dairy Wholesale Co"
+    },
+    {
+      "sku": "CREAM-002",
+      "name": "Veggie Cream Cheese",
+      "category": "Spreads",
+      "unitCost": 0.9,
+      "unitPrice": 1.75,
+      "quantityOnHand": 18,
+      "reorderPoint": 10,
+      "reorderQuantity": 40,
+      "supplier": "Dairy Wholesale Co"
+    }
+  ],
+  "lastUpdated": "2025-12-01T03:56:37Z"
+}
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,91 @@
+{
+  "name": "UMMS UltraSimple Teams\u2192GitHub publish-kb",
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "triggers": {
+      "When_a_new_channel_message_is_added": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@parameters('$connections')['teams']['connectionId']"
+            }
+          },
+          "subscriptionId": "shared_teams",
+          "operationId": "OnNewChannelMessage",
+          "path": "/beta/teams/@{encodeURIComponent(triggerBody()['teamId'])}/channels/@{encodeURIComponent(triggerBody()['channelId'])}/messages"
+        }
+      }
+    },
+    "actions": {
+      "Check_Command": {
+        "type": "If",
+        "expression": {
+          "contains": [
+            "@{triggerBody()?['body']?['content']}",
+            "publish kb"
+          ]
+        },
+        "actions": {
+          "Call_GitHub_workflow_dispatch": {
+            "type": "Http",
+            "inputs": {
+              "method": "POST",
+              "uri": "https://api.github.com/repos/{owner}/{repo}/actions/workflows/publish-kb.yml/dispatches",
+              "headers": {
+                "Accept": "application/vnd.github+json",
+                "Authorization": "Bearer @{parameters('GitHubPAT')}"
+              },
+              "body": {
+                "ref": "main",
+                "inputs": {
+                  "siteUrl": "https://contoso.sharepoint.com/sites/umms-ngmi",
+                  "siteName": "UMMS-NGMI"
+                }
+              }
+            }
+          },
+          "Reply": {
+            "type": "ApiConnection",
+            "inputs": {
+              "host": {
+                "connection": {
+                  "name": "@parameters('$connections')['teams']['connectionId']"
+                }
+              },
+              "method": "post",
+              "path": "/beta/teams/@{triggerBody()['teamId']}/channels/@{triggerBody()['channelId']}/messages",
+              "body": {
+                "body": {
+                  "contentType": "html",
+                  "content": "Publishing KB triggered for <b>UMMS-NGMI</b>."
+                }
+              }
+            }
+          }
+        },
+        "else": {
+          "actions": {}
+        }
+      }
+    },
+    "outputs": {}
+  },
+  "parameters": {
+    "$connections": {
+      "value": {
+        "teams": {
+          "connectionId": "/providers/Microsoft.PowerApps/apis/shared_teams/connections/shared-teams-1",
+          "connectionName": "shared-teams-1",
+          "id": "/providers/Microsoft.PowerApps/apis/shared_teams"
+        }
+      }
+    },
+    "GitHubPAT": {
+      "type": "securestring",
+      "value": "<PLACEHOLDER_PAT>"
+    }
+  }
+}

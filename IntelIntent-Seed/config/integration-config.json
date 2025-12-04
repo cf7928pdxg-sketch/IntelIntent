@@ -1,0 +1,285 @@
+{
+    "version": "1.0.0",
+    "description": "Universal GitHub ↔ M365 integration configuration with context-based routing",
+    "lastUpdated": "2025-11-29",
+    "contexts": {
+        "personal": {
+            "enabled": true,
+            "priority": 1,
+            "description": "Personal projects and learning repositories",
+            "integrations": {
+                "onedrive": true,
+                "outlook": true,
+                "todo": true,
+                "teams": false,
+                "planner": false,
+                "sharepoint": false,
+                "powerbi": false
+            },
+            "github": {
+                "repositories": [
+                    "cf7928pdxg-sketch/personal-projects",
+                    "cf7928pdxg-sketch/learning-sandbox"
+                ],
+                "syncEvents": [
+                    "push",
+                    "commit"
+                ],
+                "workflows": [
+                    "backup",
+                    "reminders"
+                ]
+            },
+            "m365": {
+                "driveFolder": "/Personal/GitHub-Backups",
+                "calendarName": "Personal",
+                "todoList": "GitHub Tasks",
+                "notifications": "email"
+            }
+        },
+        "developer": {
+            "enabled": true,
+            "priority": 2,
+            "description": "Development workflow with AI-enhanced features",
+            "integrations": {
+                "onedrive": true,
+                "outlook": true,
+                "todo": true,
+                "teams": true,
+                "planner": false,
+                "sharepoint": false,
+                "powerbi": false,
+                "vscode": true,
+                "copilot": true
+            },
+            "github": {
+                "repositories": [
+                    "cf7928pdxg-sketch/IntelIntent"
+                ],
+                "syncEvents": [
+                    "push",
+                    "pull_request",
+                    "release"
+                ],
+                "workflows": [
+                    "ci-cd",
+                    "notifications",
+                    "workspace-sync"
+                ]
+            },
+            "m365": {
+                "driveFolder": "/Development/IntelIntent",
+                "teamsChannel": "Development",
+                "teamsWebhook": "${TEAMS_DEV_WEBHOOK}",
+                "todoList": "Dev Tasks",
+                "notifications": "teams"
+            },
+            "vscode": {
+                "workspaceSettings": ".vscode/settings.json",
+                "syncOnPR": true,
+                "copilotContext": true
+            }
+        },
+        "family": {
+            "enabled": false,
+            "priority": 3,
+            "description": "Family collaboration and shared projects",
+            "integrations": {
+                "onedrive": true,
+                "outlook": true,
+                "todo": false,
+                "teams": false,
+                "planner": false,
+                "sharepoint": true,
+                "powerbi": false
+            },
+            "github": {
+                "repositories": [
+                    "family-org/budget-scripts",
+                    "family-org/vacation-planner"
+                ],
+                "syncEvents": [
+                    "push",
+                    "milestone"
+                ],
+                "workflows": [
+                    "backup",
+                    "calendar-sync"
+                ]
+            },
+            "m365": {
+                "driveFolder": "/Family Shared/GitHub",
+                "sharepointSite": "Family Hub",
+                "calendarName": "Family Calendar",
+                "notifications": "email"
+            }
+        },
+        "business": {
+            "enabled": true,
+            "priority": 4,
+            "description": "Professional project management and team collaboration",
+            "integrations": {
+                "onedrive": true,
+                "outlook": true,
+                "todo": true,
+                "teams": true,
+                "planner": true,
+                "sharepoint": true,
+                "powerbi": false
+            },
+            "github": {
+                "repositories": [
+                    "cf7928pdxg-sketch/IntelIntent"
+                ],
+                "syncEvents": [
+                    "issues",
+                    "pull_request",
+                    "release",
+                    "project"
+                ],
+                "workflows": [
+                    "issue-planner-sync",
+                    "pr-teams-notification",
+                    "release-sharepoint"
+                ]
+            },
+            "m365": {
+                "driveFolder": "/Business/Projects/IntelIntent",
+                "teamsChannel": "IntelIntent Project",
+                "teamsWebhook": "${TEAMS_BUSINESS_WEBHOOK}",
+                "plannerPlan": "${PLANNER_PLAN_ID}",
+                "plannerBuckets": {
+                    "backlog": "${BUCKET_BACKLOG_ID}",
+                    "inProgress": "${BUCKET_INPROGRESS_ID}",
+                    "review": "${BUCKET_REVIEW_ID}",
+                    "done": "${BUCKET_DONE_ID}"
+                },
+                "sharepointSite": "${SHAREPOINT_SITE_ID}",
+                "sharepointLibrary": "Release Notes",
+                "notifications": "teams+email"
+            }
+        },
+        "enterprise": {
+            "enabled": true,
+            "priority": 5,
+            "description": "Large-scale deployment with governance, compliance, and analytics",
+            "integrations": {
+                "onedrive": true,
+                "outlook": true,
+                "todo": false,
+                "teams": true,
+                "planner": true,
+                "sharepoint": true,
+                "powerbi": true,
+                "azuread": true,
+                "compliance": true
+            },
+            "github": {
+                "repositories": [
+                    "cf7928pdxg-sketch/IntelIntent"
+                ],
+                "enterprise": true,
+                "syncEvents": [
+                    "all"
+                ],
+                "workflows": [
+                    "full-integration",
+                    "compliance-logging",
+                    "powerbi-export"
+                ]
+            },
+            "m365": {
+                "driveFolder": "/Enterprise/IntelIntent",
+                "teamsChannel": "IntelIntent Enterprise",
+                "teamsWebhook": "${TEAMS_ENTERPRISE_WEBHOOK}",
+                "plannerPlan": "${PLANNER_ENTERPRISE_PLAN_ID}",
+                "plannerBuckets": {
+                    "precursive": "${BUCKET_PRECURSIVE_ID}",
+                    "coreEngine": "${BUCKET_CORE_ID}",
+                    "agentic": "${BUCKET_AGENTIC_ID}",
+                    "domain": "${BUCKET_DOMAIN_ID}",
+                    "navigation": "${BUCKET_NAVIGATION_ID}",
+                    "feedback": "${BUCKET_FEEDBACK_ID}"
+                },
+                "sharepointSite": "${SHAREPOINT_ENTERPRISE_SITE_ID}",
+                "sharepointLibrary": "CoE Documentation",
+                "powerbiWorkspace": "${POWERBI_WORKSPACE_ID}",
+                "powerbiDataset": "${POWERBI_DATASET_ID}",
+                "notifications": "teams+email+sms"
+            },
+            "azuread": {
+                "tenantId": "${AZURE_TENANT_ID}",
+                "clientId": "${AZURE_CLIENT_ID}",
+                "clientSecret": "${AZURE_CLIENT_SECRET}",
+                "ssoEnabled": true,
+                "mfaRequired": true
+            },
+            "compliance": {
+                "auditLogging": true,
+                "retentionDays": 365,
+                "encryptionRequired": true,
+                "complianceCenter": true
+            }
+        }
+    },
+    "global": {
+        "retryPolicy": {
+            "maxAttempts": 3,
+            "backoffMultiplier": 2,
+            "initialDelaySeconds": 5
+        },
+        "rateLimiting": {
+            "github": {
+                "requestsPerHour": 5000
+            },
+            "graphApi": {
+                "requestsPerSecond": 10
+            }
+        },
+        "logging": {
+            "level": "info",
+            "destinations": [
+                "console",
+                "file",
+                "applicationInsights"
+            ],
+            "format": "json"
+        },
+        "security": {
+            "useKeyVault": true,
+            "keyVaultName": "${KEY_VAULT_NAME}",
+            "certificateAuth": true
+        }
+    },
+    "secrets": {
+        "required": [
+            "AZURE_TENANT_ID",
+            "AZURE_CLIENT_ID",
+            "AZURE_CLIENT_SECRET",
+            "GITHUB_TOKEN",
+            "TEAMS_DEV_WEBHOOK",
+            "TEAMS_BUSINESS_WEBHOOK",
+            "TEAMS_ENTERPRISE_WEBHOOK",
+            "PLANNER_PLAN_ID",
+            "BUCKET_BACKLOG_ID",
+            "BUCKET_INPROGRESS_ID",
+            "BUCKET_REVIEW_ID",
+            "BUCKET_DONE_ID",
+            "SHAREPOINT_SITE_ID",
+            "SHAREPOINT_ENTERPRISE_SITE_ID",
+            "POWERBI_WORKSPACE_ID",
+            "POWERBI_DATASET_ID",
+            "KEY_VAULT_NAME"
+        ],
+        "optional": [
+            "BUCKET_PRECURSIVE_ID",
+            "BUCKET_CORE_ID",
+            "BUCKET_AGENTIC_ID",
+            "BUCKET_DOMAIN_ID",
+            "BUCKET_NAVIGATION_ID",
+            "BUCKET_FEEDBACK_ID",
+            "PLANNER_ENTERPRISE_PLAN_ID"
+        ],
+        "instructions": "Store secrets in GitHub Secrets or Azure Key Vault. Use ${VARIABLE_NAME} placeholders in config."
+    }
+}

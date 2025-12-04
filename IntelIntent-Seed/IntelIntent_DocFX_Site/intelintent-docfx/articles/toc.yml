@@ -1,0 +1,21 @@
+
+- name: Personas
+  items:
+    - name: Mom
+      href: personas-mom.md
+    - name: Dad
+      href: personas-dad.md
+    - name: Brother
+      href: personas-brother.md
+- name: Partner Success Benefits
+  href: partner-success.md
+- name: CEO Integration
+  href: ceo-integration.md
+- name: Lifestyle Automation
+  href: lifestyle.md
+- name: 4-Week Journey for Dad
+  href: journey.md
+- name: Declaration Library
+  href: declarations.md
+- name: Next Steps
+  href: next-steps.md

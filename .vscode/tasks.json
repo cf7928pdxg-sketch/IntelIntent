@@ -1,0 +1,200 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "PowerShell: Analyze Current File",
+            "type": "shell",
+            "command": "Invoke-ScriptAnalyzer",
+            "args": [
+                "-Path",
+                "${file}",
+                "-Settings",
+                "${workspaceFolder}/.vscode/PSScriptAnalyzerSettings.psd1"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "PowerShell: Format Current File",
+            "type": "shell",
+            "command": "Invoke-Formatter",
+            "args": [
+                "-ScriptDefinition",
+                "(Get-Content -Path ${file} -Raw)"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Week1: Run DryRun Mode",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoLogo",
+                "-File",
+                "${workspaceFolder}/Week1_Automation.ps1",
+                "-DryRun",
+                "-SkipEmail"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Week1: Run Live Mode (Requires Confirmation)",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoLogo",
+                "-File",
+                "${workspaceFolder}/Week1_Automation.ps1",
+                "-SkipEmail"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Orchestrator: Generate Components",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoLogo",
+                "-File",
+                "${workspaceFolder}/IntelIntent_Seeding/Orchestrator.ps1",
+                "-Mode",
+                "GenerateOnly",
+                "-Verbose"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Orchestrator: Validate Manifests",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoLogo",
+                "-File",
+                "${workspaceFolder}/IntelIntent_Seeding/Orchestrator.ps1",
+                "-Mode",
+                "ManifestOnly"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Orchestrator: Full Pipeline (DryRun)",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoLogo",
+                "-File",
+                "${workspaceFolder}/IntelIntent_Seeding/Orchestrator.ps1",
+                "-Mode",
+                "Full",
+                "-DryRun"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Pester: Run All Tests",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoLogo",
+                "-Command",
+                "Invoke-Pester -Output Detailed"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Pester: Run Current Test File",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoLogo",
+                "-Command",
+                "Invoke-Pester -Path '${file}' -Output Detailed"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Azure: Login",
+            "type": "shell",
+            "command": "az",
+            "args": [
+                "login"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Azure: Validate Connection",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoLogo",
+                "-Command",
+                "az account show; if ($LASTEXITCODE -eq 0) { Write-Host '✅ Azure connection valid' -ForegroundColor Green } else { Write-Host '❌ Azure login required' -ForegroundColor Red }"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Checkpoint: Validate Structure",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoLogo",
+                "-Command",
+                "$checkpoints = Get-Content './Week1_Checkpoints.json' -ErrorAction SilentlyContinue | ConvertFrom-Json; if ($checkpoints) { Write-Host \"Found $($checkpoints.Checkpoints.Count) checkpoints\" -ForegroundColor Green; $checkpoints.Checkpoints | Format-Table TaskID, Status, Duration } else { Write-Host 'No checkpoints file found' -ForegroundColor Yellow }"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Module: Check Missing Modules",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoLogo",
+                "-File",
+                "${workspaceFolder}/.vscode/scripts/Check-MissingModules.ps1"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Clean: Remove Checkpoints",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoLogo",
+                "-Command",
+                "Get-ChildItem -Path . -Recurse -Filter '*checkpoint*' -File | Remove-Item -Force -Verbose"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}

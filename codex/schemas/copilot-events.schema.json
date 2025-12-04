@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intelintent.azure.com/schemas/copilot-events.schema.json",
+  "title": "Copilot Lifecycle and Invocation Events Schema",
+  "description": "JSON Schema for GitHub Copilot lifecycle tracking and command invocation events within IntelIntent lineage system",
+  "type": "object",
+  "properties": {
+    "SessionMetadata": {
+      "type": "object",
+      "properties": {
+        "SchemaVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Semantic versioning of this schema"
+        },
+        "GeneratedBy": {
+          "type": "string",
+          "description": "Script or module that generated this log file"
+        },
+        "CreatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of log file creation"
+        },
+        "WorkspacePath": {
+          "type": "string",
+          "description": "Absolute path to the workspace directory"
+        }
+      },
+      "required": ["SchemaVersion", "GeneratedBy", "CreatedAt"]
+    },
+    "Events": {
+      "type": "array",
+      "description": "Array of lifecycle or invocation events",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/LifecycleEvent"
+          },
+          {
+            "$ref": "#/$defs/InvocationEvent"
+          }
+        ]
+      }
+    }
+  },
+  "required": ["SessionMetadata", "Events"],
+  "$defs": {
+    "LifecycleEvent": {
+      "type": "object",
+      "description": "Lifecycle event tracking Copilot enable/disable/update actions",
+      "properties": {
+        "EventType": {
+          "type": "string",
+          "const": "Lifecycle",
+          "description": "Discriminator field for event type"
+        },
+        "EventTimestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of when the event occurred"
+        },
+        "RunId": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "description": "UUID v4 for this execution run"
+        },
+        "SessionID": {
+          "type": "string",
+          "description": "IntelIntent session ID for lineage correlation"
+        },
+        "LifecycleAction": {
+          "type": "string",
+          "enum": ["Enable", "Disable", "Toggle", "Update", "Install", "Uninstall"],
+          "description": "Action performed on Copilot extension"
+        },
+        "ExtensionID": {
+          "type": "string",
+          "pattern": "^github\\.copilot(-chat)?$",
+          "description": "VS Code extension identifier"
+        },
+        "Version": {
+          "type": "string",
+          "pattern": "^v?\\d+\\.\\d+\\.\\d+$",
+          "description": "Extension version (e.g., v1.388.0)"
+        },
+        "WorkspaceName": {
+          "type": "string",
+          "description": "Human-readable workspace name"
+        },
+        "Reason": {
+          "type": "string",
+          "description": "Human-readable justification for action"
+        },
+        "Hash": {
+          "type": "string",
+          "pattern": "^([a-fA-F0-9]{64}|\\[Pending SHA256\\])$",
+          "description": "SHA256 hash of VSIX file or placeholder"
+        },
+        "Stage": {
+          "type": "string",
+          "enum": ["Bootstrap", "Week1", "Week2", "Week3", "Week4", "Production", "Development", "Testing"],
+          "description": "IntelIntent pipeline stage"
+        },
+        "Result": {
+          "type": "string",
+          "enum": ["Success", "Failed", "Skipped", "Pending"],
+          "description": "Execution result status"
+        },
+        "WorkspaceScope": {
+          "type": "string",
+          "enum": ["User", "Workspace", "Remote"],
+          "description": "VS Code settings scope"
+        },
+        "ExtensionUnification": {
+          "type": "boolean",
+          "description": "Whether unified Copilot extension is active"
+        },
+        "ErrorMessage": {
+          "type": ["string", "null"],
+          "description": "Error details if Result is Failed"
+        }
+      },
+      "required": [
+        "EventType",
+        "EventTimestamp",
+        "RunId",
+        "LifecycleAction",
+        "ExtensionID",
+        "Version",
+        "Hash",
+        "Result"
+      ],
+      "additionalProperties": false
+    },
+    "InvocationEvent": {
+      "type": "object",
+      "description": "Command invocation event tracking Copilot usage patterns",
+      "properties": {
+        "EventType": {
+          "type": "string",
+          "const": "Invocation",
+          "description": "Discriminator field for event type"
+        },
+        "EventTimestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of when the command was invoked"
+        },
+        "RunId": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "description": "UUID v4 for this execution run"
+        },
+        "SessionID": {
+          "type": "string",
+          "description": "IntelIntent session ID for lineage correlation"
+        },
+        "InvocationType": {
+          "type": "string",
+          "enum": ["Inline", "Chat", "Agent", "Panel", "Edit", "Fix", "Test", "Explain"],
+          "description": "Type of Copilot invocation"
+        },
+        "CommandID": {
+          "type": "string",
+          "pattern": "^(github\\.copilot\\.|editor\\.action\\.).*",
+          "description": "VS Code command identifier"
+        },
+        "ShortcutUsed": {
+          "type": ["string", "null"],
+          "description": "Keyboard shortcut if used (e.g., Ctrl+I)"
+        },
+        "CompletionModel": {
+          "type": "string",
+          "description": "AI model used for completion"
+        },
+        "ExtensionID": {
+          "type": "string",
+          "pattern": "^github\\.copilot(-chat)?$",
+          "description": "VS Code extension identifier"
+        },
+        "WorkspaceName": {
+          "type": "string",
+          "description": "Human-readable workspace name"
+        },
+        "Context": {
+          "type": ["string", "null"],
+          "description": "Additional context about the invocation"
+        },
+        "Stage": {
+          "type": "string",
+          "enum": ["Bootstrap", "Week1", "Week2", "Week3", "Week4", "Production", "Development", "Testing"],
+          "description": "IntelIntent pipeline stage"
+        },
+        "Result": {
+          "type": "string",
+          "enum": ["Success", "Failed", "Skipped", "Pending"],
+          "description": "Execution result status"
+        },
+        "DurationMs": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Command execution duration in milliseconds"
+        },
+        "FilePath": {
+          "type": ["string", "null"],
+          "description": "File path where command was invoked"
+        },
+        "ErrorMessage": {
+          "type": ["string", "null"],
+          "description": "Error details if Result is Failed"
+        }
+      },
+      "required": [
+        "EventType",
+        "EventTimestamp",
+        "RunId",
+        "InvocationType",
+        "CommandID",
+        "ExtensionID",
+        "Result"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

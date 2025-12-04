@@ -1,0 +1,392 @@
+# GitHub Actions Workflow for Copilot Lifecycle Tracking
+# Automates logging, integrity validation, and Power BI refresh
+
+name: Copilot Lifecycle CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'codex/scripts/**'
+      - 'codex/logs/**'
+      - 'Week1_Automation.ps1'
+      - 'IntelIntent_Seeding/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      lifecycle_action:
+        description: 'Lifecycle action to log (Enable/Disable/Update)'
+        required: false
+        default: 'Update'
+      skip_powerbi_refresh:
+        description: 'Skip Power BI refresh'
+        required: false
+        default: 'false'
+
+env:
+  WORKSPACE_NAME: 'IntelIntent'
+  STAGE: 'Production'
+  CODEX_LOGS_PATH: './codex/logs'
+  COPILOT_EXTENSION_ID: 'github.copilot'
+
+jobs:
+  # Job 1: Log Lifecycle Event
+  log-lifecycle-event:
+    name: Log Copilot Lifecycle Event
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for lineage tracking
+      
+      - name: Setup PowerShell 7
+        uses: azure/powershell@v2
+        with:
+          azPSVersion: 'latest'
+      
+      - name: Log Lifecycle Event
+        shell: pwsh
+        run: |
+          $action = "${{ github.event.inputs.lifecycle_action }}"
+          if ([string]::IsNullOrEmpty($action)) {
+            $action = "Update"
+          }
+          
+          Write-Host "🔄 Logging Copilot lifecycle event: $action"
+          
+          .\codex\scripts\Log-CopilotLifecycle.ps1 `
+            -Action $action `
+            -Version "v1.389.0" `
+            -Workspace "${{ env.WORKSPACE_NAME }}" `
+            -Reason "CI/CD pipeline triggered by commit ${{ github.sha }}" `
+            -Stage "${{ env.STAGE }}" `
+            -RunId "${{ github.run_id }}" `
+            -SessionID "GitHub-${{ github.run_number }}-${{ github.sha }}"
+      
+      - name: Upload Lifecycle Log
+        uses: actions/upload-artifact@v4
+        with:
+          name: lifecycle-log
+          path: ${{ env.CODEX_LOGS_PATH }}/CopilotLifecycleLog.json
+          retention-days: 90
+
+  # Job 2: Log Invocation Events (if applicable)
+  log-invocation-events:
+    name: Log Copilot Invocation Events
+    runs-on: windows-latest
+    needs: log-lifecycle-event
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Log Agent Invocation
+        shell: pwsh
+        run: |
+          Write-Host "🤖 Logging Copilot Agent invocation"
+          
+          .\codex\scripts\Log-CopilotInvocation.ps1 `
+            -InvocationType "Agent" `
+            -CommandID "github.copilot.agent.invoke" `
+            -CompletionModel "claude-sonnet-4.5-2024-11-27" `
+            -Workspace "${{ env.WORKSPACE_NAME }}" `
+            -Context "CI/CD automation: Workflow run ${{ github.run_number }}" `
+            -Stage "${{ env.STAGE }}" `
+            -RunId "${{ github.run_id }}" `
+            -SessionID "GitHub-${{ github.run_number }}-${{ github.sha }}"
+      
+      - name: Upload Invocation Log
+        uses: actions/upload-artifact@v4
+        with:
+          name: invocation-log
+          path: ${{ env.CODEX_LOGS_PATH }}/CopilotInvocationLog.json
+          retention-days: 90
+
+  # Job 3: Integrity Validation
+  validate-integrity:
+    name: Validate Codex Integrity
+    runs-on: windows-latest
+    needs: [log-lifecycle-event, log-invocation-events]
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Download Lifecycle Log
+        uses: actions/download-artifact@v4
+        with:
+          name: lifecycle-log
+          path: ${{ env.CODEX_LOGS_PATH }}
+      
+      - name: Download Invocation Log
+        uses: actions/download-artifact@v4
+        with:
+          name: invocation-log
+          path: ${{ env.CODEX_LOGS_PATH }}
+      
+      - name: Run Integrity Tests
+        id: integrity
+        shell: pwsh
+        run: |
+          Write-Host "🔍 Running Codex integrity validation..."
+          
+          $result = .\codex\scripts\Test-CodexIntegrity.ps1 -Verbose
+          
+          if (-not $result.AllValid) {
+            Write-Host "❌ Integrity validation failed!"
+            Write-Host "Lifecycle Log Valid: $($result.LifecycleLogValid)"
+            Write-Host "Invocation Log Valid: $($result.InvocationLogValid)"
+            Write-Host "Hash Compliance: $($result.HashCompliancePercent)%"
+            exit 1
+          }
+          
+          Write-Host "✅ Integrity validation passed!"
+          Write-Host "Total Events: $($result.TotalEvents)"
+          Write-Host "Hash Compliance: $($result.HashCompliancePercent)%"
+          
+          # Export for downstream jobs
+          "TOTAL_EVENTS=$($result.TotalEvents)" >> $env:GITHUB_OUTPUT
+          "HASH_COMPLIANCE=$($result.HashCompliancePercent)" >> $env:GITHUB_OUTPUT
+      
+      - name: Upload Integrity Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integrity-report
+          path: ${{ env.CODEX_LOGS_PATH }}/*.json
+          retention-days: 90
+      
+      - name: Comment PR with Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const totalEvents = '${{ steps.integrity.outputs.TOTAL_EVENTS }}';
+            const hashCompliance = '${{ steps.integrity.outputs.HASH_COMPLIANCE }}';
+            
+            const body = `## 🔍 Codex Integrity Validation
+            
+            **Status**: ✅ Passed
+            **Total Events**: ${totalEvents}
+            **Hash Compliance**: ${hashCompliance}%
+            
+            All Copilot lifecycle and invocation events validated successfully.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  # Job 4: Schema Validation
+  validate-schema:
+    name: Validate JSON Schema
+    runs-on: ubuntu-latest
+    needs: validate-integrity
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install Dependencies
+        run: |
+          npm install ajv@8.12.0 ajv-formats@2.1.1
+      
+      - name: Download Logs
+        uses: actions/download-artifact@v4
+        with:
+          name: integrity-report
+          path: ${{ env.CODEX_LOGS_PATH }}
+      
+      - name: Validate Schema Compliance
+        run: |
+          echo "📋 Validating JSON schema compliance..."
+          node codex/scripts/validate-codex-integrity.js
+      
+      - name: Upload Validation Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: schema-validation
+          path: ${{ env.CODEX_LOGS_PATH }}/validation-*.json
+          retention-days: 30
+
+  # Job 5: Power BI Refresh (Optional)
+  refresh-powerbi:
+    name: Trigger Power BI Dataset Refresh
+    runs-on: ubuntu-latest
+    needs: validate-schema
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') &&
+      github.event.inputs.skip_powerbi_refresh != 'true'
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Download Validated Logs
+        uses: actions/download-artifact@v4
+        with:
+          name: integrity-report
+          path: ${{ env.CODEX_LOGS_PATH }}
+      
+      - name: Upload to Azure Blob Storage
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            az storage blob upload \
+              --account-name intelintentlogs \
+              --container-name copilot-logs \
+              --name "CopilotLifecycleLog-${{ github.run_number }}.json" \
+              --file ${{ env.CODEX_LOGS_PATH }}/CopilotLifecycleLog.json \
+              --overwrite
+            
+            az storage blob upload \
+              --account-name intelintentlogs \
+              --container-name copilot-logs \
+              --name "CopilotInvocationLog-${{ github.run_number }}.json" \
+              --file ${{ env.CODEX_LOGS_PATH }}/CopilotInvocationLog.json \
+              --overwrite
+      
+      - name: Trigger Power BI Refresh
+        shell: bash
+        env:
+          POWERBI_WORKSPACE_ID: ${{ secrets.POWERBI_WORKSPACE_ID }}
+          POWERBI_DATASET_ID: ${{ secrets.POWERBI_DATASET_ID }}
+          POWERBI_CLIENT_ID: ${{ secrets.POWERBI_CLIENT_ID }}
+          POWERBI_CLIENT_SECRET: ${{ secrets.POWERBI_CLIENT_SECRET }}
+          POWERBI_TENANT_ID: ${{ secrets.POWERBI_TENANT_ID }}
+        run: |
+          echo "🔄 Triggering Power BI dataset refresh..."
+          
+          # Get access token
+          TOKEN=$(curl -s -X POST \
+            "https://login.microsoftonline.com/$POWERBI_TENANT_ID/oauth2/v2.0/token" \
+            -d "client_id=$POWERBI_CLIENT_ID" \
+            -d "client_secret=$POWERBI_CLIENT_SECRET" \
+            -d "scope=https://analysis.windows.net/powerbi/api/.default" \
+            -d "grant_type=client_credentials" | jq -r '.access_token')
+          
+          # Trigger refresh
+          curl -X POST \
+            "https://api.powerbi.com/v1.0/myorg/groups/$POWERBI_WORKSPACE_ID/datasets/$POWERBI_DATASET_ID/refreshes" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json"
+          
+          echo "✅ Power BI refresh initiated"
+
+  # Job 6: Notification
+  notify-completion:
+    name: Send Completion Notification
+    runs-on: ubuntu-latest
+    needs: [validate-integrity, refresh-powerbi]
+    if: always()
+    
+    steps:
+      - name: Send Slack Notification
+        if: secrets.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚀 Copilot Lifecycle CI/CD Pipeline Completed",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "Copilot Lifecycle Pipeline - ${{ github.run_number }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Repository:*\n${{ github.repository }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n${{ github.ref_name }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Status:*\n${{ job.status }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Triggered By:*\n${{ github.actor }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Run"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+# Additional workflow for scheduled logging
+---
+name: Scheduled Copilot Lifecycle Snapshot
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  snapshot-lifecycle:
+    runs-on: windows-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Log Scheduled Snapshot
+        shell: pwsh
+        run: |
+          .\codex\scripts\Log-CopilotLifecycle.ps1 `
+            -Action "Update" `
+            -Version "v1.389.0" `
+            -Workspace "IntelIntent" `
+            -Reason "Scheduled snapshot for lineage tracking" `
+            -Stage "Production"
+      
+      - name: Commit Changes
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add codex/logs/*.json
+          git commit -m "chore: automated Copilot lifecycle snapshot [skip ci]" || echo "No changes"
+          git push

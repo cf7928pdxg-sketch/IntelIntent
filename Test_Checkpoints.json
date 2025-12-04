@@ -1,0 +1,60 @@
+{
+    "EndTime":  "2025-11-30T10:15:00Z",
+    "Checkpoints":  [
+                        {
+                            "Description":  "Provision Azure Key Vault",
+                            "Inputs":  {
+                                           "ResourceGroup":  "Phase4RG",
+                                           "VaultName":  "IntelIntentSecrets"
+                                       },
+                            "Outputs":  {
+                                            "VaultUri":  "https://intelintentsecrets.vault.azure.net/"
+                                        },
+                            "Signature":  "[Pending SHA256]",
+                            "TaskID":  "KV-001",
+                            "Artifacts":  [
+                                              "IntelIntentSecrets"
+                                          ],
+                            "Status":  "Success",
+                            "Duration":  45,
+                            "Timestamp":  "2025-11-30T10:05:00Z"
+                        },
+                        {
+                            "Description":  "Configure RBAC roles",
+                            "Inputs":  {
+                                           "Role":  "Key Vault Secrets Officer",
+                                           "PrincipalId":  "abc-123"
+                                       },
+                            "Outputs":  {
+                                            "RoleAssignment":  "Granted"
+                                        },
+                            "Signature":  "[Pending SHA256]",
+                            "TaskID":  "RBAC-001",
+                            "Artifacts":  [
+                                              "Phase4-Admin"
+                                          ],
+                            "Status":  "Success",
+                            "Duration":  12,
+                            "Timestamp":  "2025-11-30T10:08:00Z"
+                        },
+                        {
+                            "Description":  "Connect to Microsoft Graph",
+                            "Inputs":  {
+                                           "TenantId":  "tenant-123"
+                                       },
+                            "Outputs":  {
+                                            "Error":  "Authentication timeout"
+                                        },
+                            "Signature":  "[Pending SHA256]",
+                            "TaskID":  "GRAPH-001",
+                            "Artifacts":  [
+
+                                          ],
+                            "Status":  "Failed",
+                            "Duration":  180,
+                            "Timestamp":  "2025-11-30T10:12:00Z"
+                        }
+                    ],
+    "StartTime":  "2025-11-30T10:00:00Z",
+    "SessionID":  "test-session-001"
+}

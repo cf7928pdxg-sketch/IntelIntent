@@ -1,0 +1,68 @@
+
+name: publish-kb
+
+on:
+  workflow_dispatch:
+    inputs:
+      siteUrl:
+        description: 'SharePoint site URL'
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install tools
+        run: |
+          npm i -g @pnp/cli-microsoft365@latest markdown-it@14 markdown-it-front-matter@0
+
+      - name: Login M365
+        env:
+          M365_TENANT: ${{ secrets.M365_TENANT }}
+          M365_APP_ID: ${{ secrets.M365_APP_ID }}
+          M365_CERT_B64: ${{ secrets.M365_CERT_B64 }}
+          M365_CERT_PASSPHRASE: ${{ secrets.M365_CERT_PASSPHRASE }}
+        run: |
+          m365 login --authType certificate \
+            --tenant $M365_TENANT \
+            --appId $M365_APP_ID \
+            --certificateBase64Encoded "$M365_CERT_B64" \
+            --password "$M365_CERT_PASSPHRASE"
+
+      - name: Convert Markdown to HTML and upload to Docs library with metadata
+        run: |
+          echo "Converting and uploading..."
+          FILES=$(git ls-files | grep -E '^docs/.*\.md$' || true)
+          for f in $FILES; do
+            htmlfile=$(echo $f | sed 's/.md$/.html/')
+            node -e "const fs=require('fs');const md=require('markdown-it')();const fm=require('markdown-it-front-matter');let fmdata={};md.use(fm, fm=>{fmdata=fm});const src=fs.readFileSync('$f','utf8');const out=md.render(src);fs.mkdirSync(require('path').dirname('$htmlfile'),{recursive:true});fs.writeFileSync('$htmlfile',out);console.log('Converted:','${f}','->','${htmlfile}');"
+            # Derive metadata from path: docs/<nn>-<portfolio>/... -> Portfolio
+            portfolio=$(echo $f | awk -F'/' '{print $2}' | sed 's/^[0-9][0-9]-//')
+            domain=$(echo $f | grep -oE '/(personal|family|business|shared-platform)/' | sed 's#/##g' | head -n1)
+            module=$(basename "$f" .md)
+            # Upload file to Docs
+            m365 spo file add --filePath "$f" --webUrl "${{ github.event.inputs.siteUrl }}" --folder "Shared Documents/Docs" --overwrite || true
+            # Set metadata (best-effort)
+            m365 spo file set --webUrl "${{ github.event.inputs.siteUrl }}" --fileUrl "Shared Documents/Docs/$(basename $f)" --properties "Domain=$domain,Portfolio=$portfolio,Module=$module,Status=Published" || true
+          done
+
+      - name: Create/Update Site Pages from HTML
+        run: |
+          HTMLS=$(git ls-files | grep -E '^docs/.*\.html$' || true)
+          for h in $HTMLS; do
+            page=$(basename "$h" .html).aspx
+            m365 spo page add --name "$page" --webUrl "${{ github.event.inputs.siteUrl }}" --publish || true
+            m365 spo page text add --pageName "$page" --webUrl "${{ github.event.inputs.siteUrl }}" --text "$(cat $h | sed 's/"/\\"/g')" --section 1 --column 1 || true
+          done

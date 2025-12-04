@@ -1,0 +1,275 @@
+name: Phase 4 Codex Scroll Delivery
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Week1_Automation.ps1'
+      - 'IntelIntent_Seeding/*.psm1'
+      - '.github/workflows/phase4-scroll-delivery.yml'
+  workflow_dispatch:
+    inputs:
+      skipEmail:
+        description: 'Skip email delivery'
+        required: false
+        default: 'false'
+      dryRun:
+        description: 'Dry run mode'
+        required: false
+        default: 'false'
+
+env:
+  AZURE_RESOURCE_GROUP: Phase4RG
+  AZURE_LOCATION: centralus
+  VAULT_NAME: IntelIntentSecrets
+
+jobs:
+  phase4-week1-execution:
+    runs-on: windows-latest
+    
+    steps:
+      # ===========================
+      # 1. Checkout Repository
+      # ===========================
+      - name: 📦 Checkout repository
+        uses: actions/checkout@v4
+
+      # ===========================
+      # 2. Setup PowerShell
+      # ===========================
+      - name: 🔧 Setup PowerShell 7
+        uses: actions/setup-powershell@v1
+
+      # ===========================
+      # 3. Install Azure CLI
+      # ===========================
+      - name: 🌐 Install Azure CLI
+        run: |
+          Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
+          Start-Process msiexec.exe -ArgumentList '/I AzureCLI.msi /quiet /norestart' -Wait
+          Remove-Item .\AzureCLI.msi
+        shell: pwsh
+
+      # ===========================
+      # 4. Azure Authentication
+      # ===========================
+      - name: 🔐 Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # ===========================
+      # 5. Validate Azure Resources
+      # ===========================
+      - name: ✅ Validate Azure Environment
+        run: |
+          Write-Host "Validating Azure subscription..." -ForegroundColor Cyan
+          $subscription = az account show --query name -o tsv
+          Write-Host "✅ Subscription: $subscription" -ForegroundColor Green
+          
+          # Check resource group exists
+          $rgExists = az group exists --name $env:AZURE_RESOURCE_GROUP
+          if ($rgExists -eq "false") {
+            Write-Host "Creating resource group: $env:AZURE_RESOURCE_GROUP" -ForegroundColor Yellow
+            az group create --name $env:AZURE_RESOURCE_GROUP --location $env:AZURE_LOCATION
+          } else {
+            Write-Host "✅ Resource group exists: $env:AZURE_RESOURCE_GROUP" -ForegroundColor Green
+          }
+        shell: pwsh
+
+      # ===========================
+      # 6. Run Week 1 Automation
+      # ===========================
+      - name: 🚀 Execute Phase 4 Week 1 Automation
+        run: |
+          $params = @{}
+          
+          if ("${{ github.event.inputs.dryRun }}" -eq "true") {
+            $params.DryRun = $true
+            Write-Host "⚠️ Running in DRY RUN mode" -ForegroundColor Yellow
+          }
+          
+          if ("${{ github.event.inputs.skipEmail }}" -eq "true") {
+            $params.SkipEmail = $true
+            Write-Host "⏭️ Email delivery will be skipped" -ForegroundColor Yellow
+          }
+          
+          $params.ResourceGroup = $env:AZURE_RESOURCE_GROUP
+          $params.Location = $env:AZURE_LOCATION
+          $params.VaultName = $env:VAULT_NAME
+          
+          .\Week1_Automation.ps1 @params
+        shell: pwsh
+        env:
+          AZURE_RESOURCE_GROUP: ${{ env.AZURE_RESOURCE_GROUP }}
+          AZURE_LOCATION: ${{ env.AZURE_LOCATION }}
+          VAULT_NAME: ${{ env.VAULT_NAME }}
+
+      # ===========================
+      # 7. Upload Checkpoint Artifacts
+      # ===========================
+      - name: 📤 Upload Checkpoint JSON
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: week1-checkpoints
+          path: Week1_Checkpoints.json
+          retention-days: 90
+
+      # ===========================
+      # 8. Upload Markdown Scroll
+      # ===========================
+      - name: 📤 Upload Markdown Scroll
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: codex-scroll-markdown
+          path: Sponsors/Week1_Codex_Scroll.md
+          retention-days: 90
+
+      # ===========================
+      # 9. Upload HTML Scroll
+      # ===========================
+      - name: 📤 Upload HTML Scroll
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: codex-scroll-html
+          path: Sponsors/Week1_Codex_Scroll.html
+          retention-days: 90
+
+      # ===========================
+      # 10. Send Email via Graph API
+      # ===========================
+      - name: 📧 Send Codex Scroll to Sponsors
+        if: success() && github.event.inputs.skipEmail != 'true'
+        run: |
+          Import-Module .\IntelIntent_Seeding\Get-CodexEmailBody.psm1 -Force
+          
+          # Get Graph API access token
+          $token = az account get-access-token --resource https://graph.microsoft.com --query accessToken -o tsv
+          
+          # Generate email payload
+          $payload = Get-CodexEmailBody `
+            -ScrollPath ".\Sponsors\Week1_Codex_Scroll.html" `
+            -Recipients @("${{ secrets.SPONSOR_EMAIL }}") `
+            -Subject "IntelIntent Phase 4 Week 1 Complete - Codex Lineage Report" `
+            -IncludeSummary `
+            -PowerBIDashboardUrl "${{ secrets.POWERBI_DASHBOARD_URL }}" `
+            -Template "Executive" `
+            -Attachments @(".\Sponsors\Week1_Codex_Scroll.md")
+          
+          # Validate payload
+          $isValid = Test-CodexEmailPayload -Payload $payload
+          
+          if ($isValid) {
+            # Send email
+            Send-CodexEmail -Payload $payload -AccessToken $token
+            Write-Host "✅ Codex Scroll delivered to sponsors" -ForegroundColor Green
+          } else {
+            Write-Error "❌ Email payload validation failed"
+            exit 1
+          }
+        shell: pwsh
+
+      # ===========================
+      # 11. Create GitHub Release (Optional)
+      # ===========================
+      - name: 🏷️ Create Release
+        if: success() && github.ref == 'refs/heads/main'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: phase4-week1-${{ github.run_number }}
+          release_name: Phase 4 Week 1 - Build ${{ github.run_number }}
+          body: |
+            ## Phase 4 Week 1 Execution Complete
+            
+            **Session ID:** See Week1_Checkpoints.json
+            **Checkpoints:** 26 tasks
+            **Artifacts:**
+            - Markdown Codex Scroll
+            - HTML Codex Scroll
+            - Checkpoint JSON
+            
+            **Sponsor Delivery:** Automated via IdentityAgent
+            
+            [View Power BI Dashboard](${{ secrets.POWERBI_DASHBOARD_URL }})
+          draft: false
+          prerelease: false
+
+      # ===========================
+      # 12. Notify on Failure
+      # ===========================
+      - name: 🚨 Notify Failure
+        if: failure()
+        run: |
+          Write-Host "❌ Phase 4 Week 1 execution failed" -ForegroundColor Red
+          Write-Host "Check logs for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" -ForegroundColor Yellow
+        shell: pwsh
+
+  # ===========================
+  # Post-Execution Analysis
+  # ===========================
+  analyze-checkpoints:
+    runs-on: ubuntu-latest
+    needs: phase4-week1-execution
+    if: success()
+    
+    steps:
+      - name: 📦 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📥 Download Checkpoint Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: week1-checkpoints
+
+      - name: 📊 Analyze Checkpoint Metrics
+        run: |
+          echo "📊 Checkpoint Analysis"
+          
+          # Parse checkpoint JSON
+          CHECKPOINT_COUNT=$(jq '.Checkpoints | length' Week1_Checkpoints.json)
+          SUCCESS_COUNT=$(jq '[.Checkpoints[] | select(.Status=="Success")] | length' Week1_Checkpoints.json)
+          FAILED_COUNT=$(jq '[.Checkpoints[] | select(.Status=="Failed")] | length' Week1_Checkpoints.json)
+          
+          SUCCESS_RATE=$(echo "scale=1; ($SUCCESS_COUNT / $CHECKPOINT_COUNT) * 100" | bc)
+          
+          echo "Total Checkpoints: $CHECKPOINT_COUNT"
+          echo "Success: $SUCCESS_COUNT"
+          echo "Failed: $FAILED_COUNT"
+          echo "Success Rate: $SUCCESS_RATE%"
+          
+          # Create summary
+          echo "## Phase 4 Week 1 Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Total Checkpoints | $CHECKPOINT_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| Success | $SUCCESS_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| Failed | $FAILED_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| Success Rate | $SUCCESS_RATE% |" >> $GITHUB_STEP_SUMMARY
+        shell: bash
+
+      - name: 📈 Upload Metrics to Power BI
+        if: secrets.POWERBI_PUSH_URL != ''
+        run: |
+          # Prepare metrics payload
+          METRICS=$(jq -c '{
+            sessionId: .SessionID,
+            startTime: .StartTime,
+            checkpointCount: (.Checkpoints | length),
+            successCount: ([.Checkpoints[] | select(.Status=="Success")] | length),
+            failedCount: ([.Checkpoints[] | select(.Status=="Failed")] | length)
+          }' Week1_Checkpoints.json)
+          
+          # Push to Power BI streaming dataset
+          curl -X POST "${{ secrets.POWERBI_PUSH_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "$METRICS"
+          
+          echo "✅ Metrics pushed to Power BI"
+        shell: bash

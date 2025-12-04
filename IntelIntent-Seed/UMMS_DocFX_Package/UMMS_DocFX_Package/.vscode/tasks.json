@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "DocFX: Generate TOCs",
+      "type": "shell",
+      "command": "python docfx_project/make_toc.py",
+      "problemMatcher": []
+    },
+    {
+      "label": "DocFX: Build",
+      "type": "shell",
+      "command": "docfx build",
+      "problemMatcher": []
+    },
+    {
+      "label": "DocFX: Serve",
+      "type": "shell",
+      "command": "docfx build --serve --open-browser",
+      "problemMatcher": []
+    }
+  ]
+}

@@ -32,7 +32,8 @@ Backup/**/*.bak
 *.local
 
 # IDE
-.vscode/
+# Keep .vscode configuration for team development
+.vscode/settings.local.json
 .vs/
 *.swp
 *.swo
@@ -68,3 +69,17 @@ IntelIntent-Seed/UMMS_VSCode_Seeder/
 *.cer
 *.key
 secrets.json
+IntelIntent-Seed/java-1.8.0-openjdk*/
+# Installer binaries and large downloads
+IntelIntent-Seed/*.exe
+IntelIntent-Seed/*.msi
+IntelIntent-Seed/*.zip
+IntelIntent-Seed/*.crdownload
+IntelIntent-Seed/*.VSIX
+IntelIntent-Seed/*.vsix
+
+# Boot and EFI binaries
+boot/
+efi/
+setup.exe
+support/

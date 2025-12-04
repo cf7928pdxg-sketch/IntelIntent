@@ -1,0 +1,29 @@
+{
+  "intents": [
+    {
+      "name": "CreateProject",
+      "parameters": {
+        "projectName": "string",
+        "deadline": "date"
+      },
+      "description": "Intent to create a new project in the Enterprise domain."
+    },
+    {
+      "name": "AssignTask",
+      "parameters": {
+        "taskName": "string",
+        "assignee": "string",
+        "dueDate": "date"
+      },
+      "description": "Intent to assign a task to a team member."
+    },
+    {
+      "name": "GenerateReport",
+      "parameters": {
+        "reportType": "string",
+        "timePeriod": "string"
+      },
+      "description": "Intent to generate a report based on specified criteria."
+    }
+  ]
+}

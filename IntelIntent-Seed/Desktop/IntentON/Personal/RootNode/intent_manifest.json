@@ -1,0 +1,23 @@
+{
+  "intents": [
+    {
+      "name": "greet",
+      "parameters": {
+        "user_name": "string",
+        "time_of_day": "string"
+      }
+    },
+    {
+      "name": "farewell",
+      "parameters": {
+        "user_name": "string"
+      }
+    },
+    {
+      "name": "ask_question",
+      "parameters": {
+        "question": "string"
+      }
+    }
+  ]
+}

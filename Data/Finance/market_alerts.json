@@ -1,0 +1,61 @@
+{
+    "alerts": [
+        {
+            "id": "alert-001",
+            "symbol": "MSFT",
+            "type": "PriceTarget",
+            "condition": "above",
+            "targetPrice": 380.0,
+            "currentPrice": 375.5,
+            "status": "active",
+            "createdDate": "2025-11-15"
+        },
+        {
+            "id": "alert-002",
+            "symbol": "AAPL",
+            "type": "PercentChange",
+            "condition": "above",
+            "targetPercent": 5.0,
+            "status": "active",
+            "createdDate": "2025-11-20"
+        },
+        {
+            "type": "PriceTarget",
+            "symbol": "NVDA",
+            "targetPrice": 500.0,
+            "id": "alert-918",
+            "condition": "above",
+            "createdDate": "2025-11-30",
+            "status": "active"
+        }
+    ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

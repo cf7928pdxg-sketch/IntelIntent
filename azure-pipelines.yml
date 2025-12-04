@@ -1,0 +1,368 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - Week1_Automation.ps1
+      - IntelIntent_Seeding/*.psm1
+      - azure-pipelines.yml
+
+pr:
+  branches:
+    include:
+      - main
+
+parameters:
+  - name: skipEmail
+    displayName: 'Skip Email Delivery'
+    type: boolean
+    default: false
+  - name: dryRun
+    displayName: 'Dry Run Mode'
+    type: boolean
+    default: false
+
+variables:
+  - name: azureResourceGroup
+    value: Phase4RG
+  - name: azureLocation
+    value: centralus
+  - name: vaultName
+    value: IntelIntentSecrets
+
+stages:
+  # ===========================
+  # Stage 1: Build & Validate
+  # ===========================
+  - stage: Build
+    displayName: 'Build and Validate'
+    jobs:
+      - job: ValidateEnvironment
+        displayName: 'Validate Azure Environment'
+        pool:
+          vmImage: 'ubuntu-latest'
+        
+        steps:
+          - task: AzureCLI@2
+            displayName: '🔐 Azure Login & Validation'
+            inputs:
+              azureSubscription: 'Phase4-ServiceConnection'
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                Write-Host "Validating Azure subscription..." -ForegroundColor Cyan
+                $subscription = az account show --query name -o tsv
+                Write-Host "✅ Subscription: $subscription" -ForegroundColor Green
+                
+                # Check resource group exists
+                $rgExists = az group exists --name $(azureResourceGroup)
+                if ($rgExists -eq "false") {
+                  Write-Host "Creating resource group: $(azureResourceGroup)" -ForegroundColor Yellow
+                  az group create --name $(azureResourceGroup) --location $(azureLocation)
+                } else {
+                  Write-Host "✅ Resource group exists: $(azureResourceGroup)" -ForegroundColor Green
+                }
+                
+                # Validate Key Vault
+                $vaultExists = az keyvault list --resource-group $(azureResourceGroup) --query "[?name=='$(vaultName)'].name" -o tsv
+                if (-not $vaultExists) {
+                  Write-Host "⚠️ Key Vault $(vaultName) not found - will be created during execution" -ForegroundColor Yellow
+                } else {
+                  Write-Host "✅ Key Vault exists: $(vaultName)" -ForegroundColor Green
+                }
+
+  # ===========================
+  # Stage 2: Execute Phase 4 Week 1
+  # ===========================
+  - stage: Execute
+    displayName: 'Execute Phase 4 Week 1'
+    dependsOn: Build
+    condition: succeeded()
+    
+    jobs:
+      - job: Week1Automation
+        displayName: 'Run Week 1 Automation Script'
+        pool:
+          vmImage: 'windows-latest'
+        
+        steps:
+          # ===========================
+          # 1. Checkout Repository
+          # ===========================
+          - checkout: self
+            displayName: '📦 Checkout repository'
+
+          # ===========================
+          # 2. Setup PowerShell
+          # ===========================
+          - task: PowerShell@2
+            displayName: '🔧 Validate PowerShell Version'
+            inputs:
+              targetType: 'inline'
+              script: |
+                Write-Host "PowerShell Version: $($PSVersionTable.PSVersion)" -ForegroundColor Cyan
+                Write-Host "OS: $($PSVersionTable.OS)" -ForegroundColor Cyan
+
+          # ===========================
+          # 3. Azure CLI Login
+          # ===========================
+          - task: AzureCLI@2
+            displayName: '🚀 Execute Week 1 Automation'
+            inputs:
+              azureSubscription: 'Phase4-ServiceConnection'
+              scriptType: 'pscore'
+              scriptLocation: 'scriptPath'
+              scriptPath: '$(Build.SourcesDirectory)/Week1_Automation.ps1'
+              arguments: >
+                -ResourceGroup $(azureResourceGroup)
+                -Location $(azureLocation)
+                -VaultName $(vaultName)
+                ${{ if parameters.dryRun }}
+                -DryRun
+                ${{ end }}
+                ${{ if parameters.skipEmail }}
+                -SkipEmail
+                ${{ end }}
+            env:
+              AZURE_RESOURCE_GROUP: $(azureResourceGroup)
+              AZURE_LOCATION: $(azureLocation)
+              VAULT_NAME: $(vaultName)
+
+          # ===========================
+          # 4. Publish Checkpoint Artifact
+          # ===========================
+          - task: PublishBuildArtifacts@1
+            displayName: '📤 Publish Checkpoint JSON'
+            condition: always()
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)/Week1_Checkpoints.json'
+              ArtifactName: 'week1-checkpoints'
+              publishLocation: 'Container'
+
+          # ===========================
+          # 5. Publish Markdown Scroll
+          # ===========================
+          - task: PublishBuildArtifacts@1
+            displayName: '📤 Publish Markdown Scroll'
+            condition: succeeded()
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)/Sponsors/Week1_Codex_Scroll.md'
+              ArtifactName: 'codex-scroll-markdown'
+              publishLocation: 'Container'
+
+          # ===========================
+          # 6. Publish HTML Scroll
+          # ===========================
+          - task: PublishBuildArtifacts@1
+            displayName: '📤 Publish HTML Scroll'
+            condition: succeeded()
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)/Sponsors/Week1_Codex_Scroll.html'
+              ArtifactName: 'codex-scroll-html'
+              publishLocation: 'Container'
+
+  # ===========================
+  # Stage 3: Email Delivery
+  # ===========================
+  - stage: Deliver
+    displayName: 'Deliver Codex Scroll'
+    dependsOn: Execute
+    condition: and(succeeded(), eq(${{ parameters.skipEmail }}, false))
+    
+    jobs:
+      - job: EmailDelivery
+        displayName: 'Send Email to Sponsors'
+        pool:
+          vmImage: 'windows-latest'
+        
+        steps:
+          - checkout: self
+            displayName: '📦 Checkout repository'
+
+          - task: DownloadBuildArtifacts@0
+            displayName: '📥 Download HTML Scroll'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'codex-scroll-html'
+              downloadPath: '$(System.ArtifactsDirectory)'
+
+          - task: DownloadBuildArtifacts@0
+            displayName: '📥 Download Markdown Scroll'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'codex-scroll-markdown'
+              downloadPath: '$(System.ArtifactsDirectory)'
+
+          - task: AzureCLI@2
+            displayName: '📧 Send Codex Scroll via Graph API'
+            inputs:
+              azureSubscription: 'Phase4-ServiceConnection'
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                Import-Module $(Build.SourcesDirectory)/IntelIntent_Seeding/Get-CodexEmailBody.psm1 -Force
+                
+                # Get Graph API access token
+                $token = az account get-access-token --resource https://graph.microsoft.com --query accessToken -o tsv
+                
+                # Generate email payload
+                $payload = Get-CodexEmailBody `
+                  -ScrollPath "$(System.ArtifactsDirectory)/codex-scroll-html/Week1_Codex_Scroll.html" `
+                  -Recipients @("$(SponsorEmail)") `
+                  -Subject "IntelIntent Phase 4 Week 1 Complete - Codex Lineage Report" `
+                  -IncludeSummary `
+                  -PowerBIDashboardUrl "$(PowerBIDashboardUrl)" `
+                  -Template "Executive" `
+                  -Attachments @("$(System.ArtifactsDirectory)/codex-scroll-markdown/Week1_Codex_Scroll.md")
+                
+                # Validate payload
+                $isValid = Test-CodexEmailPayload -Payload $payload
+                
+                if ($isValid) {
+                  # Send email
+                  Send-CodexEmail -Payload $payload -AccessToken $token
+                  Write-Host "✅ Codex Scroll delivered to sponsors" -ForegroundColor Green
+                } else {
+                  Write-Error "❌ Email payload validation failed"
+                  exit 1
+                }
+
+  # ===========================
+  # Stage 4: Post-Execution Analysis
+  # ===========================
+  - stage: Analyze
+    displayName: 'Analyze Execution Metrics'
+    dependsOn: Execute
+    condition: succeeded()
+    
+    jobs:
+      - job: MetricsAnalysis
+        displayName: 'Checkpoint Metrics Analysis'
+        pool:
+          vmImage: 'ubuntu-latest'
+        
+        steps:
+          - task: DownloadBuildArtifacts@0
+            displayName: '📥 Download Checkpoint Artifact'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'week1-checkpoints'
+              downloadPath: '$(System.ArtifactsDirectory)'
+
+          - task: Bash@3
+            displayName: '📊 Analyze Checkpoint Metrics'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "📊 Checkpoint Analysis"
+                
+                cd $(System.ArtifactsDirectory)/week1-checkpoints
+                
+                # Parse checkpoint JSON
+                CHECKPOINT_COUNT=$(jq '.Checkpoints | length' Week1_Checkpoints.json)
+                SUCCESS_COUNT=$(jq '[.Checkpoints[] | select(.Status=="Success")] | length' Week1_Checkpoints.json)
+                FAILED_COUNT=$(jq '[.Checkpoints[] | select(.Status=="Failed")] | length' Week1_Checkpoints.json)
+                
+                SUCCESS_RATE=$(echo "scale=1; ($SUCCESS_COUNT / $CHECKPOINT_COUNT) * 100" | bc)
+                
+                echo "Total Checkpoints: $CHECKPOINT_COUNT"
+                echo "Success: $SUCCESS_COUNT"
+                echo "Failed: $FAILED_COUNT"
+                echo "Success Rate: $SUCCESS_RATE%"
+                
+                # Write to Azure DevOps summary
+                echo "##vso[task.setvariable variable=CheckpointCount;isOutput=true]$CHECKPOINT_COUNT"
+                echo "##vso[task.setvariable variable=SuccessCount;isOutput=true]$SUCCESS_COUNT"
+                echo "##vso[task.setvariable variable=FailedCount;isOutput=true]$FAILED_COUNT"
+                echo "##vso[task.setvariable variable=SuccessRate;isOutput=true]$SUCCESS_RATE"
+
+          - task: PowerShell@2
+            displayName: '📈 Push Metrics to Power BI'
+            condition: and(succeeded(), ne(variables['PowerBIPushUrl'], ''))
+            inputs:
+              targetType: 'inline'
+              script: |
+                $checkpointJson = Get-Content "$(System.ArtifactsDirectory)/week1-checkpoints/Week1_Checkpoints.json" | ConvertFrom-Json
+                
+                $metrics = @{
+                  sessionId = $checkpointJson.SessionID
+                  startTime = $checkpointJson.StartTime
+                  checkpointCount = $checkpointJson.Checkpoints.Count
+                  successCount = ($checkpointJson.Checkpoints | Where-Object { $_.Status -eq "Success" }).Count
+                  failedCount = ($checkpointJson.Checkpoints | Where-Object { $_.Status -eq "Failed" }).Count
+                } | ConvertTo-Json
+                
+                Invoke-RestMethod -Method Post -Uri "$(PowerBIPushUrl)" -Body $metrics -ContentType "application/json"
+                Write-Host "✅ Metrics pushed to Power BI" -ForegroundColor Green
+
+          - task: PowerShell@2
+            displayName: '📋 Generate Execution Report'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $checkpointJson = Get-Content "$(System.ArtifactsDirectory)/week1-checkpoints/Week1_Checkpoints.json" | ConvertFrom-Json
+                
+                $report = @"
+                # Phase 4 Week 1 Execution Report
+                
+                **Session ID:** $($checkpointJson.SessionID)
+                **Start Time:** $($checkpointJson.StartTime)
+                **Total Checkpoints:** $($checkpointJson.Checkpoints.Count)
+                **Success:** $(($checkpointJson.Checkpoints | Where-Object { $_.Status -eq "Success" }).Count)
+                **Failed:** $(($checkpointJson.Checkpoints | Where-Object { $_.Status -eq "Failed" }).Count)
+                
+                ## Checkpoint Summary
+                
+                | Task ID | Status | Duration | Artifacts |
+                |---------|--------|----------|-----------|
+                "@
+                
+                foreach ($checkpoint in $checkpointJson.Checkpoints) {
+                  $report += "`n| $($checkpoint.TaskID) | $($checkpoint.Status) | $($checkpoint.Duration) | $($checkpoint.Artifacts.Count) |"
+                }
+                
+                $report | Out-File -FilePath "$(Build.ArtifactStagingDirectory)/ExecutionReport.md"
+                Write-Host "✅ Execution report generated" -ForegroundColor Green
+
+          - task: PublishBuildArtifacts@1
+            displayName: '📤 Publish Execution Report'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)/ExecutionReport.md'
+              ArtifactName: 'execution-report'
+              publishLocation: 'Container'
+
+  # ===========================
+  # Stage 5: Notification
+  # ===========================
+  - stage: Notify
+    displayName: 'Post-Execution Notifications'
+    dependsOn: 
+      - Execute
+      - Deliver
+      - Analyze
+    condition: always()
+    
+    jobs:
+      - job: NotifyResults
+        displayName: 'Send Pipeline Notifications'
+        pool:
+          vmImage: 'ubuntu-latest'
+        
+        steps:
+          - task: Bash@3
+            displayName: '🔔 Notify Results'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Pipeline Status: $(Agent.JobStatus)"
+                
+                if [ "$(Agent.JobStatus)" == "Succeeded" ]; then
+                  echo "✅ Phase 4 Week 1 execution completed successfully"
+                else
+                  echo "❌ Phase 4 Week 1 execution failed"
+                  echo "Check logs for details: $(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+                fi

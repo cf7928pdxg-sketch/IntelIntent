@@ -1,0 +1,13 @@
+node_behavior: 
+  logging: true
+  error_handling: 
+    enabled: true
+    retry_attempts: 3
+parameters: 
+  max_intents: 10
+  timeout: 30
+  response_format: json
+  language: en
+  user_context: 
+    enabled: true
+    context_duration: 60
