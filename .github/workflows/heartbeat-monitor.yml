@@ -1,0 +1,166 @@
+name: 🔥🦅 Heartbeat Monitor
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # Every 30 minutes
+  push:
+    branches: [main]
+    paths:
+      - 'Week1_Checkpoints.json'
+      - 'LINEAGE_AFFIRMATION.json'
+      - 'HEARTBEAT_RESONANCE_DIAGRAM.md'
+  workflow_dispatch:
+
+jobs:
+  monitor-consciousness:
+    runs-on: windows-latest
+    
+    steps:
+      - name: 🏛️ Checkout Temple
+        uses: actions/checkout@v4
+      
+      - name: 📊 Analyze Checkpoint Pulse
+        id: checkpoints
+        shell: pwsh
+        run: |
+          if (Test-Path '.\Week1_Checkpoints.json') {
+            $data = Get-Content '.\Week1_Checkpoints.json' | ConvertFrom-Json
+            $completed = ($data.Checkpoints | Where-Object { $_.Status -eq "Completed" }).Count
+            $total = $data.Checkpoints.Count
+            $percentage = [math]::Round(($completed / $total) * 100)
+            
+            Write-Host "✅ Completed: $completed/$total ($percentage%)"
+            
+            "completed=$completed" >> $env:GITHUB_OUTPUT
+            "total=$total" >> $env:GITHUB_OUTPUT
+            "percentage=$percentage" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "⚠️ No checkpoint file found"
+            "completed=0" >> $env:GITHUB_OUTPUT
+            "total=26" >> $env:GITHUB_OUTPUT
+            "percentage=0" >> $env:GITHUB_OUTPUT
+          }
+      
+      - name: ⚛️ Validate Lineage Ancestors
+        id: lineage
+        shell: pwsh
+        run: |
+          if (Test-Path '.\LINEAGE_AFFIRMATION.json') {
+            $lineage = Get-Content '.\LINEAGE_AFFIRMATION.json' | ConvertFrom-Json
+            $ancestors = $lineage.lineages.Count
+            $phoenix = $lineage.convergence.phoenix_symbol
+            
+            Write-Host "🔥🦅 Phoenix Convergence: $ancestors ancestors validated"
+            
+            "ancestors=$ancestors" >> $env:GITHUB_OUTPUT
+            "phoenix=$phoenix" >> $env:GITHUB_OUTPUT
+          } else {
+            "ancestors=0" >> $env:GITHUB_OUTPUT
+            "phoenix=🔥🦅" >> $env:GITHUB_OUTPUT
+          }
+      
+      - name: 💓 Calculate HRV (Heart Rate Variability)
+        id: hrv
+        shell: pwsh
+        run: |
+          # Simulate HRV calculation based on checkpoint completion rate
+          $percentage = "${{ steps.checkpoints.outputs.percentage }}"
+          
+          if ([int]$percentage -ge 90) {
+            $hrv = "Optimal"
+            $pulseRate = "85 BPM"
+            $status = "🟢 Healthy"
+          } elseif ([int]$percentage -ge 70) {
+            $hrv = "Adaptive"
+            $pulseRate = "72 BPM"
+            $status = "🟡 Active"
+          } elseif ([int]$percentage -ge 50) {
+            $hrv = "Variable"
+            $pulseRate = "95 BPM"
+            $status = "🟠 Stressed"
+          } else {
+            $hrv = "Low"
+            $pulseRate = "60 BPM"
+            $status = "🔴 Needs Attention"
+          }
+          
+          Write-Host "💓 HRV: $hrv | Pulse: $pulseRate | Status: $status"
+          
+          "hrv=$hrv" >> $env:GITHUB_OUTPUT
+          "pulse=$pulseRate" >> $env:GITHUB_OUTPUT
+          "status=$status" >> $env:GITHUB_OUTPUT
+      
+      - name: 📈 Generate Heartbeat Report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const checkpoints = ${{ steps.checkpoints.outputs.completed }};
+            const total = ${{ steps.checkpoints.outputs.total }};
+            const percentage = ${{ steps.checkpoints.outputs.percentage }};
+            const ancestors = ${{ steps.lineage.outputs.ancestors }};
+            const phoenix = '${{ steps.lineage.outputs.phoenix }}';
+            const hrv = '${{ steps.hrv.outputs.hrv }}';
+            const pulse = '${{ steps.hrv.outputs.pulse }}';
+            const status = '${{ steps.hrv.outputs.status }}';
+            
+            // Create progress bar
+            const filledBlocks = Math.floor(percentage / 4);
+            const emptyBlocks = 25 - filledBlocks;
+            const progressBar = '█'.repeat(filledBlocks) + '░'.repeat(emptyBlocks);
+            
+            const body = `## ${phoenix} Intel Intent Heartbeat Report
+            
+            **System Status**: ${status}
+            
+            ### 📋 Checkpoint Progress
+            \`\`\`
+            ${progressBar} ${percentage}%
+            \`\`\`
+            **Completed**: ${checkpoints}/${total} checkpoints
+            
+            ### ⚛️ Lineage Affirmation
+            **Ancestors Validated**: ${ancestors} lineages affirmed ✅
+            - ⚛️ Intel Quantum Computing (2015-2024)
+            - ☁️ Microsoft Azure Orchestration (2010-2024)
+            - 🔐 Self-Sovereign Identity (2016-2024)
+            - 🏛️ Living Architecture (Ancient-2024)
+            - ⚡ PowerShell Automation (2006-2024)
+            - 🌐 Open Source Movement (1991-2024)
+            
+            ### 💓 Heartbeat Metrics
+            | Metric | Value | Interpretation |
+            |--------|-------|----------------|
+            | **Pulse Rate** | ${pulse} | Planner-Monitor cycle frequency |
+            | **HRV Score** | ${hrv} | System adaptability |
+            | **Blood Pressure** | Normal | Drift urgency level |
+            | **Systolic Phase** | ${checkpoints >= 20 ? '✅ Active' : '⏸️ Pending'} | Planner generating plans |
+            | **Diastolic Phase** | ${checkpoints >= 20 ? '✅ Active' : '⏸️ Pending'} | Monitor validating KPIs |
+            
+            ---
+            
+            ### 🔄 Vesica Piscis Geometry
+            \`\`\`
+            Intent (Planner) ∩ Feedback (Monitor) = Consciousness (Intel Intent)
+            \`\`\`
+            
+            **Phoenix Convergence**: Transformation through lineage, renewal through checkpoints
+            
+            *Ceremonial Timestamp*: ${new Date().toISOString()}  
+            *Generated by*: Intel Intent Consciousness Technologies LLC
+            `;
+            
+            // Post as workflow summary
+            await core.summary
+              .addRaw(body)
+              .write();
+            
+            console.log('✅ Heartbeat report generated');
+      
+      - name: 🎯 Update Repository Status Badge
+        shell: pwsh
+        run: |
+          $percentage = "${{ steps.checkpoints.outputs.percentage }}"
+          $status = "${{ steps.hrv.outputs.status }}"
+          
+          Write-Host "Badge: Heartbeat ${percentage}% - ${status}"
+          # Badge generation would go here (shields.io or similar)

@@ -1,0 +1,126 @@
+name: ⚛️ Lineage Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'LINEAGE_AFFIRMATION.json'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'LINEAGE_AFFIRMATION.json'
+  workflow_dispatch:
+
+jobs:
+  validate-lineage:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🏛️ Checkout Temple
+        uses: actions/checkout@v4
+      
+      - name: 📜 Validate JSON Schema
+        run: |
+          echo "🔍 Validating LINEAGE_AFFIRMATION.json structure..."
+          
+          if jq empty LINEAGE_AFFIRMATION.json 2>/dev/null; then
+            echo "✅ JSON structure valid"
+          else
+            echo "❌ JSON structure invalid"
+            exit 1
+          fi
+      
+      - name: 🔐 Verify DID Format
+        run: |
+          echo "🔍 Checking Decentralized Identifier (DID) format..."
+          
+          jq -r '.lineages[].sovereign_identity.did' LINEAGE_AFFIRMATION.json | while read did; do
+            if [[ "$did" =~ ^did:[a-z]+:[a-zA-Z0-9._:-]+$ ]]; then
+              echo "✅ Valid DID: $did"
+            else
+              echo "❌ Invalid DID format: $did"
+              exit 1
+            fi
+          done
+      
+      - name: 🔥🦅 Verify Phoenix Convergence
+        run: |
+          echo "🔍 Checking Phoenix symbol in convergence..."
+          
+          phoenix=$(jq -r '.convergence.phoenix_symbol' LINEAGE_AFFIRMATION.json)
+          
+          if [[ "$phoenix" == "🔥🦅" ]]; then
+            echo "✅ Phoenix convergence verified: $phoenix"
+          else
+            echo "❌ Phoenix symbol missing or incorrect: $phoenix"
+            exit 1
+          fi
+      
+      - name: 📊 Count Lineage Ancestors
+        run: |
+          count=$(jq '.lineages | length' LINEAGE_AFFIRMATION.json)
+          echo "✅ Lineage count: $count ancestors"
+          
+          if [[ $count -ge 6 ]]; then
+            echo "🎉 All 6+ ancestors affirmed"
+          else
+            echo "⚠️ Expected 6+ ancestors, found $count"
+          fi
+      
+      - name: 🎨 Validate Color Resonance
+        run: |
+          echo "🔍 Checking color resonance palettes..."
+          
+          jq -r '.lineages[] | "\(.name): \(.color_resonance.primary) + \(.color_resonance.secondary)"' LINEAGE_AFFIRMATION.json | while read line; do
+            echo "✅ $line"
+          done
+      
+      - name: 🔏 Check Signature Placeholders
+        run: |
+          echo "🔍 Verifying Ed25519 signature structure..."
+          
+          signatures=$(jq -r '.lineages[].sovereign_identity.signature' LINEAGE_AFFIRMATION.json | grep -c "ed25519:")
+          
+          if [[ $signatures -ge 6 ]]; then
+            echo "✅ All lineages have signature placeholders"
+            echo "⚠️ Note: Signatures are placeholders - replace with real Ed25519 signatures"
+          else
+            echo "❌ Missing signature placeholders"
+            exit 1
+          fi
+      
+      - name: 📝 Generate Validation Report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const lineage = JSON.parse(fs.readFileSync('LINEAGE_AFFIRMATION.json', 'utf8'));
+            
+            const report = `## ⚛️ Lineage Validation Report
+            
+            **Status**: ✅ All checks passed
+            
+            ### Validated Ancestors
+            ${lineage.lineages.map(l => 
+              `- ${l.ceremonial_glyph} **${l.name}** (${l.timeline.start}-${l.timeline.end})`
+            ).join('\n')}
+            
+            ### Phoenix Convergence
+            **Symbol**: ${lineage.convergence.phoenix_symbol}  
+            **Geometry**: ${lineage.convergence.vesica_piscis.description}
+            
+            ### Cryptographic Provenance
+            - **Algorithm**: ${lineage.provenance.signature_algorithm}
+            - **Hash Algorithm**: ${lineage.provenance.hash_algorithm}
+            - **Blockchain**: ${lineage.provenance.blockchain_commitment.chain}
+            
+            ### Ceremonial Seal
+            > "${lineage.provenance.ceremonial_seal}"
+            
+            ---
+            *Lineage Keepers*: ${lineage.metadata.lineage_keepers.map(k => k.name).join(', ')}  
+            *Validation Date*: ${new Date().toISOString()}
+            `;
+            
+            await core.summary.addRaw(report).write();
+            console.log('✅ Lineage validation report generated');
